@@ -1,5 +1,7 @@
 package org.example.pivo.service;
 
+import org.example.pivo.components.NanoIdGenerator;
+import org.example.pivo.config.property.NanoIdProperty;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
@@ -18,10 +20,13 @@ import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.example.pivo.utils.data.BeerData.beerEntity;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -31,23 +36,22 @@ public class BeerServiceTests {
     private BeerMapper beerMapper = Mappers.getMapper(BeerMapper.class);
     private TypeRepository mockTypeRepository = mock(TypeRepository.class);
     private BeerRepository mockBeerRepository = mock(BeerRepository.class);
-
+    private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
+    private String idAle = "9kxe2OW_cPwW5exgivJ";
 
 
     @BeforeEach
-    void setup() {
-        beerService = new BeerService(mockBeerRepository, mockTypeRepository, beerMapper);
-    }
+    void setup() {beerService = new BeerService(mockBeerRepository, mockTypeRepository, beerMapper);}
 
     @Test
     @DisplayName("Create beer with a type from type repository")
     void createBeer_TypePresent() {
         var typeName = "lager";
-        var typeEntity = TypeData.typeEntity(1L, typeName);
-        var beerEntity = BeerData.beerEntity(1L, typeName);
+        var typeEntity = TypeData.typeEntity(BigInteger.valueOf(2), typeName);
+        var beerEntity = BeerData.beerEntity(idLager, typeName);
         var beerEntityNullId = BeerData.beerEntity(null, typeName);
         var createBeerDto = BeerData.createBeerDto(typeName);
-        var beerDto = BeerData.beerDto(typeName);
+        var beerDto = BeerData.beerDto(idLager, typeName);
 
         Mockito.doReturn(Optional.of(typeEntity)).when(mockTypeRepository).findByName(typeName);
         Mockito.doReturn(typeEntity).when(mockTypeRepository).save(typeEntity);
@@ -62,48 +66,37 @@ public class BeerServiceTests {
     }
 
     @Test
-    @DisplayName("Create beer with a new type")
+    @DisplayName("Throw exception that no type was found")
     void createBeer_TypeAbsent() {
         var typeName = "ale";
         var createBeerDto = BeerData.createBeerDto(typeName);
-        var beerDto = BeerData.beerDto(typeName);
-        var typeEntity = TypeData.newTypeEntity(typeName);
-        var typeEntityWithId = TypeData.newTypeEntityWithId(typeName);
-        var beerEntity = BeerData.beerEntity(2L, typeName);
-        var beerEntityNullId = BeerData.beerEntity(typeName);
 
         Mockito.doReturn(Optional.empty()).when(mockTypeRepository).findByName(typeName);
-        Mockito.doReturn(typeEntityWithId).when(mockTypeRepository).save(typeEntity);
-        Mockito.doReturn(beerEntity).when(mockBeerRepository).save(beerEntityNullId);
 
-        var actual = beerService.create(createBeerDto);
-        assertThat(actual)
-                .isNotNull()
-                .isEqualTo(beerDto);
-        Mockito.verify(mockTypeRepository, Mockito.times(1)).save(typeEntity);
-        Mockito.verify(mockBeerRepository, Mockito.times(1)).save(beerEntityNullId);
+        assertThatThrownBy(() -> beerService.create(createBeerDto))
+                .isInstanceOf(RuntimeException.class);
     }
 
 
     @Test
     @DisplayName("Return a list of beers with correct types")
     void getAll_FullRepositories() {
-        var beerDtoLager = BeerData.beerDto("lager");
-        var beerDtoAle = BeerData.beerDto("ale");
+        var beerDtoLager = BeerData.beerDto(idLager, "lager");
+        var beerDtoAle = BeerData.beerDto(idAle, "ale");
         List<BeerDto> beerDtoList = new ArrayList<>();
         beerDtoList.add(beerDtoLager);
         beerDtoList.add(beerDtoAle);
-        var beerEntityLager = BeerData.beerEntity(1L, "lager");
-        var beerEntityAle = BeerData.beerEntity(2L, "ale");
+        var beerEntityLager = BeerData.beerEntity(idLager, "lager");
+        var beerEntityAle = BeerData.beerEntity(idAle, "ale");
         List<BeerEntity> beerEntityList = new ArrayList<>();
         beerEntityList.add(beerEntityAle);
         beerEntityList.add(beerEntityLager);
-        var typeEntityLager = TypeData.typeEntity(1L, "lager");
-        var typeEntityAle = TypeData.typeEntity(2L, "ale");
+        var typeEntityLager = TypeData.typeEntity(BigInteger.valueOf(2), "lager");
+        var typeEntityAle = TypeData.typeEntity(BigInteger.valueOf(1), "ale");
 
         Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
-        Mockito.doReturn(Optional.of(typeEntityLager)).when(mockTypeRepository).findById(1L);
-        Mockito.doReturn(Optional.of(typeEntityAle)).when(mockTypeRepository).findById(2L);
+        Mockito.doReturn(Optional.of(typeEntityLager)).when(mockTypeRepository).findById(BigInteger.valueOf(2));
+        Mockito.doReturn(Optional.of(typeEntityAle)).when(mockTypeRepository).findById(BigInteger.valueOf(1));
 
         var actual = beerService.getAll();
         assertThat(actual)
@@ -128,14 +121,13 @@ public class BeerServiceTests {
     @DisplayName("Return a beer")
     void getBeer_ReturnBeer() {
         var typeName = "lager";
-        var id = 1L;
-        var typeEntity = TypeData.typeEntity(id, typeName);
-        var beerDto = BeerData.beerDto(typeName);
+        var typeEntity = TypeData.typeEntity(BigInteger.valueOf(2), typeName);
+        var beerDto = BeerData.beerDto(idLager, typeName);
 
-        Mockito.doReturn(Optional.of(beerEntity(id, typeName))).when(mockBeerRepository).findById(id);
-        Mockito.doReturn(Optional.of(typeEntity)).when(mockTypeRepository).findById(id);
+        Mockito.doReturn(Optional.of(beerEntity(idLager, typeName))).when(mockBeerRepository).findById(idLager);
+        Mockito.doReturn(Optional.of(typeEntity)).when(mockTypeRepository).findById(BigInteger.valueOf(2));
 
-        var actual = beerService.get(id);
+        var actual = beerService.get(idLager);
         assertThat(actual)
                 .isNotNull()
                 .isEqualTo(Optional.of(beerDto));
@@ -144,9 +136,9 @@ public class BeerServiceTests {
     @Test
     @DisplayName("Return error: Предоставлен неверный id")
     void getBeer_ThrowError() {
-        Mockito.doReturn(Optional.empty()).when(mockBeerRepository).findById(0L);
+        Mockito.doReturn(Optional.empty()).when(mockBeerRepository).findById("0");
 
-        var exception = assertThrows(RuntimeException.class, () -> beerService.get(0L));
+        var exception = assertThrows(RuntimeException.class, () -> beerService.get("0"));
         assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }

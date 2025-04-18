@@ -1,22 +1,27 @@
 package org.example.pivo.utils.data;
 
+import org.example.pivo.components.NanoIdGenerator;
+import org.example.pivo.config.property.NanoIdProperty;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Objects;
 
 public class BeerData {
 
-    public static BeerEntity beerEntity(Long id, String typeName) {
+    public static BeerEntity beerEntity(String id, String typeName) {
+
         if(Objects.equals(typeName, "ale")){
             return BeerEntity.builder()
                     .id(id)
                     .name("Troll Brew IPA светлое нефильтрованное")
                     .producer( "Арвиай")
-                    .price(120L)
-                    .alcohol(8L)
-                    .type(2L)
+                    .price(BigDecimal.valueOf(120))
+                    .alcohol(BigDecimal.valueOf(8))
+                    .type(BigInteger.valueOf(1))
                     .build();
         }
         else{
@@ -24,9 +29,9 @@ public class BeerData {
                     .id(id)
                     .name("Жигули Барное светлое фильтрованное")
                     .producer("Московская пивоваренная компания'")
-                    .price(70L)
-                    .alcohol(5L)
-                    .type(1L)
+                    .price(BigDecimal.valueOf(70))
+                    .alcohol(BigDecimal.valueOf(5))
+                    .type(BigInteger.valueOf(2))
                     .build();
         }
     }
@@ -36,40 +41,40 @@ public class BeerData {
             return BeerEntity.builder()
                     .name("Troll Brew IPA светлое нефильтрованное")
                     .producer( "Арвиай")
-                    .price(120L)
-                    .alcohol(8L)
-                    .type(2L)
+                    .price(BigDecimal.valueOf(120))
+                    .alcohol(BigDecimal.valueOf(8))
+                    .type(BigInteger.valueOf(1))
                     .build();
         }
         else{
             return BeerEntity.builder()
                     .name("Жигули Барное светлое фильтрованное")
                     .producer("Московская пивоваренная компания'")
-                    .price(70L)
-                    .alcohol(5L)
-                    .type(1L)
+                    .price(BigDecimal.valueOf(70))
+                    .alcohol(BigDecimal.valueOf(5))
+                    .type(BigInteger.valueOf(2))
                     .build();
         }
     }
 
-    public static BeerDto beerDto(String typeName) {
+    public static BeerDto beerDto(String id, String typeName) {
         if(Objects.equals(typeName, "ale")){
             return BeerDto.builder()
-                    .id(2L)
+                    .id(id)
                     .name("Troll Brew IPA светлое нефильтрованное")
                     .producer( "Арвиай")
-                    .price(120L)
-                    .alcohol(8L)
+                    .price(BigDecimal.valueOf(120))
+                    .alcohol(BigDecimal.valueOf(8))
                     .typeName(typeName)
                     .build();
         }
         else{
             return BeerDto.builder()
-                    .id(1L)
+                    .id(id)
                     .name("Жигули Барное светлое фильтрованное")
                     .producer("Московская пивоваренная компания'")
-                    .price(70L)
-                    .alcohol(5L)
+                    .price(BigDecimal.valueOf(70))
+                    .alcohol(BigDecimal.valueOf(5))
                     .typeName(typeName)
                     .build();
         }
@@ -80,8 +85,8 @@ public class BeerData {
             return CreateBeerDto.builder()
                     .name("Жигули Барное светлое фильтрованное")
                     .producer("Московская пивоваренная компания'")
-                    .price(70L)
-                    .alcohol(5L)
+                    .price(BigDecimal.valueOf(70))
+                    .alcohol(BigDecimal.valueOf(5))
                     .typeName(typeName)
                     .build();
         }
@@ -89,8 +94,8 @@ public class BeerData {
             return CreateBeerDto.builder()
                     .name("Troll Brew IPA светлое нефильтрованное")
                     .producer("Арвиай")
-                    .price(120L)
-                    .alcohol(8L)
+                    .price(BigDecimal.valueOf(120))
+                    .alcohol(BigDecimal.valueOf(8))
                     .typeName(typeName)
                     .build();
         }

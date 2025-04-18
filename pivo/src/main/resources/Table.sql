@@ -1,24 +1,27 @@
 CREATE TABLE type
 (
-    id VARCHAR(50) PRIMARY KEY,
+    id BIGINT NOT NULL,
     name VARCHAR(20) NOT NULL
 );
+
+CREATE TABLE beer
+(
+    id VARCHAR(25) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    producer VARCHAR(50),
+    price BIGINT NOT NULL,
+    alcohol BIGINT NOT NULL,
+    type BIGINT NOT NULL,
+    FOREIGN KEY (type) REFERENCES type(id)
+);
+
 CREATE TABLE store
 (
     id VARCHAR(50) PRIMARY KEY,
     address VARCHAR(50) NOT NULL,
     phone VARCHAR(25) NOT NULL
 );
-CREATE TABLE beer
-(
-    id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    producer VARCHAR(50) NOT NULL,
-    price BIGINT NOT NULL,
-    alcohol BIGINT NOT NULL,
-    type BIGINT NOT NULL,
-    FOREIGN KEY (type) REFERENCES type(id)
-);
+
 CREATE TABLE storage
 (
     id VARCHAR(50) PRIMARY KEY,
@@ -42,11 +45,7 @@ CREATE TABLE employee
 );
 
 
-INSERT INTO type
-VALUES
-(DEFAULT, 'эль'),
-(DEFAULT, 'лагер'),
-(DEFAULT, 'стаут');
+
 
 INSERT INTO store
 VALUES

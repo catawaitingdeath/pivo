@@ -11,6 +11,7 @@ import org.example.pivo.repository.TypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class BeerService {
     public BeerDto create(CreateBeerDto beer) {
         BeerEntity beerEntity = beerMapper.toEntity(beer);
         var typeEntity = typeRepository.findByName(beer.getTypeName())
-                .orElseGet(() -> typeRepository.save(new TypeEntity(null, beer.getTypeName())));
+                .orElseThrow(() -> new RuntimeException("Тип не найден"));
         beerEntity.setType(typeEntity.getId());
         beerEntity = beerRepository.save(beerEntity);
         return beerMapper.toDto(beerEntity, typeEntity);
@@ -47,7 +48,7 @@ public class BeerService {
         return result;
     }
 
-    public Optional<BeerDto> get(Long id) {
+    public Optional<BeerDto> get(String id) {
         var beerEntity = beerRepository.findById(id).stream()
                 .findFirst()
                 .orElse(null);
@@ -59,7 +60,7 @@ public class BeerService {
         return Optional.of(beerDto);
     }
 
-    public List<BeerEntity> custom(Long price, Long alcohol) {
+    public List<BeerEntity> custom(BigDecimal price, BigDecimal alcohol) {
         return beerRepository.findAllByPriceGreaterThanAndAlcoholOrderByPriceDesc(price, alcohol);
     }
 }

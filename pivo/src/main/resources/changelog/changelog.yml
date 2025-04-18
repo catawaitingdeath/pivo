@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - include:
+      file: changelog/2025-04-15/beer_and_type-ddl.sql
+  - include:
+      file: changelog/2025-04-15/type-dml.sql
+  - include:
+      file: changelog/2025-04-15/beer_changed_id-ddl.sql
+
