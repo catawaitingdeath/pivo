@@ -14,4 +14,5 @@ public interface BeerRepository extends CrudRepository<BeerEntity, String> {
 
     List<BeerEntity> findAll();
     List<BeerEntity> findAllByPriceGreaterThanAndAlcoholOrderByPriceDesc(BigDecimal price, BigDecimal alcohol);
+    List<BeerEntity> findAllByProducer(String producer);
 }

@@ -46,7 +46,7 @@ public class BeerServiceTests {
     @Test
     @DisplayName("Create beer with a type from type repository")
     void createBeer_TypePresent() {
-        var typeName = "lager";
+        var typeName = "лагер";
         var typeEntity = TypeData.typeEntity(BigInteger.valueOf(2), typeName);
         var beerEntity = BeerData.beerEntity(idLager, typeName);
         var beerEntityNullId = BeerData.beerEntity(null, typeName);
@@ -68,7 +68,7 @@ public class BeerServiceTests {
     @Test
     @DisplayName("Throw exception that no type was found")
     void createBeer_TypeAbsent() {
-        var typeName = "ale";
+        var typeName = "эль";
         var createBeerDto = BeerData.createBeerDto(typeName);
 
         Mockito.doReturn(Optional.empty()).when(mockTypeRepository).findByName(typeName);
@@ -81,18 +81,18 @@ public class BeerServiceTests {
     @Test
     @DisplayName("Return a list of beers with correct types")
     void getAll_FullRepositories() {
-        var beerDtoLager = BeerData.beerDto(idLager, "lager");
-        var beerDtoAle = BeerData.beerDto(idAle, "ale");
+        var beerDtoLager = BeerData.beerDto(idLager, "лагер");
+        var beerDtoAle = BeerData.beerDto(idAle, "эль");
         List<BeerDto> beerDtoList = new ArrayList<>();
         beerDtoList.add(beerDtoLager);
         beerDtoList.add(beerDtoAle);
-        var beerEntityLager = BeerData.beerEntity(idLager, "lager");
-        var beerEntityAle = BeerData.beerEntity(idAle, "ale");
+        var beerEntityLager = BeerData.beerEntity(idLager, "лагер");
+        var beerEntityAle = BeerData.beerEntity(idAle, "эль");
         List<BeerEntity> beerEntityList = new ArrayList<>();
         beerEntityList.add(beerEntityAle);
         beerEntityList.add(beerEntityLager);
-        var typeEntityLager = TypeData.typeEntity(BigInteger.valueOf(2), "lager");
-        var typeEntityAle = TypeData.typeEntity(BigInteger.valueOf(1), "ale");
+        var typeEntityLager = TypeData.typeEntity(BigInteger.valueOf(2), "лагер");
+        var typeEntityAle = TypeData.typeEntity(BigInteger.valueOf(1), "эль");
 
         Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
         Mockito.doReturn(Optional.of(typeEntityLager)).when(mockTypeRepository).findById(BigInteger.valueOf(2));
@@ -120,7 +120,7 @@ public class BeerServiceTests {
     @Test
     @DisplayName("Return a beer")
     void getBeer_ReturnBeer() {
-        var typeName = "lager";
+        var typeName = "лагер";
         var typeEntity = TypeData.typeEntity(BigInteger.valueOf(2), typeName);
         var beerDto = BeerData.beerDto(idLager, typeName);
 

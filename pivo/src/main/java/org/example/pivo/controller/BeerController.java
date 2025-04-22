@@ -7,6 +7,7 @@ import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.service.BeerService;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
