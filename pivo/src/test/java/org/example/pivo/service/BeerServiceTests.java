@@ -1,15 +1,10 @@
 package org.example.pivo.service;
 
-import org.example.pivo.components.NanoIdGenerator;
-import org.example.pivo.config.property.NanoIdProperty;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
-import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
-import org.example.pivo.model.entity.TypeEntity;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
-import org.example.pivo.utils.FileReaderUtility;
 import org.example.pivo.utils.data.BeerData;
 import org.example.pivo.utils.data.TypeData;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,14 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.example.pivo.utils.data.BeerData.beerEntity;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,7 +34,9 @@ public class BeerServiceTests {
 
 
     @BeforeEach
-    void setup() {beerService = new BeerService(mockBeerRepository, mockTypeRepository, beerMapper);}
+    void setup() {
+        beerService = new BeerService(mockBeerRepository, mockTypeRepository, beerMapper);
+    }
 
     @Test
     @DisplayName("Create beer with a type from type repository")

@@ -2,9 +2,7 @@ package org.example.pivo.utils.data;
 
 import org.example.pivo.model.entity.TypeEntity;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Objects;
 
 public class TypeData {
 

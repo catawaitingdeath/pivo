@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.assertj.core.api.Assertions;
+import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.service.BeerService;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -30,11 +32,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BeerControllerTests {
 
     @Autowired
-    protected MockMvc mockMvc;
+    private MockMvc mockMvc;
     @Autowired
-    protected BeerRepository beerRepository;
-    @Autowired private BeerService beerService;
-    @Autowired private ObjectMapper jacksonObjectMapper;
+    private BeerRepository beerRepository;
+    @Autowired
+    private BeerService beerService;
+    @Autowired
+    private ObjectMapper jacksonObjectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() {
@@ -42,59 +48,41 @@ public class BeerControllerTests {
     }
 
     @Test
-    void myAwesomeTest() throws Exception {
+    void createTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/beer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "Охота крепкое",
-                                  "producer": "Хейнекен",
-                                  "price": 90,
-                                  "alcohol": 8.5,
+                                  "name": "Жигули Барное светлое фильтрованное",
+                                  "producer": "Московская пивоваренная компания",
+                                  "price": 70,
+                                  "alcohol": 5,
                                   "typeName": "лагер"
                                 }"""))
                 .andExpect(MockMvcResultMatchers.status().isOk());
-        var pivo = beerRepository.findAllByProducer("Хейнекен");
-        Assertions.assertThat(pivo)
-                .hasSize(1);
-    }
-
-    @Test
-    void myAwesomeTest1() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/beer")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "name": "Охота крепкое",
-                                  "producer": "Хейнекен",
-                                  "price": 90,
-                                  "alcohol": 8.5,
-                                  "typeName": "лагер"
-                                }"""))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-        var pivo = beerRepository.findAllByProducer("Хейнекен");
+        var pivo = beerRepository.findAll();
         Assertions.assertThat(pivo)
                 .hasSize(1);
     }
 
     @Test
     void getAllTest() throws Exception {
-        var CreateBeerDto1 = BeerData.createBeerDto("лагер");
-        var CreateBeerDto2 = BeerData.createBeerDto("эль");
-        beerService.create(CreateBeerDto1);
-        beerService.create(CreateBeerDto2);
+        var beerEntity1 = BeerData.beerEntity("лагер");
+        var beerEntity2 = BeerData.beerEntity("эль");
+        beerRepository.save(beerEntity1);
+        beerRepository.save(beerEntity2);
         mockMvc.perform(MockMvcRequestBuilders.get("/beer")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$[0].typeName").value("лагер"))
+                .andExpect(jsonPath("$[1].typeName").value("эль"));
     }
 
     @Test
-    void gerBeerTest() throws Exception {
+    void getBeerTest() throws Exception {
         var createBeerDto = BeerData.createBeerDto("лагер");
         var id = beerService.create(createBeerDto).getId();
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String jsonBeer = ow.writeValueAsString(createBeerDto);
+        String jsonBeer = objectMapper.writeValueAsString(createBeerDto);
         mockMvc.perform(MockMvcRequestBuilders.get("/beer/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -108,16 +96,13 @@ public class BeerControllerTests {
         var idLager = beerService.create(createBeerDtoLager).getId();
         var idAle = beerService.create(createBeerDtoAle).getId();
         var expectedList = List.of(beerRepository.findById(idLager).get(), beerRepository.findById(idAle).get());
-        var jsonBeer = mockMvc.perform(MockMvcRequestBuilders.get("/beer/custom")
+        var expectedListString = jacksonObjectMapper.writeValueAsString(expectedList);
+        mockMvc.perform(MockMvcRequestBuilders.get("/beer/custom")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("price", "10")
                         .param("alcohol", "5"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        List<BeerEntity> list = jacksonObjectMapper.readValue(jsonBeer, new TypeReference<>(){});
-        Assertions.assertThat(list)
-                .hasSize(2)
-                .containsExactlyInAnyOrderElementsOf(expectedList);
+                .andExpect(content().json(expectedListString));
     }
 
 }
