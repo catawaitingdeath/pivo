@@ -1,0 +1,56 @@
+# Устанавливаем LF по умолчанию
+*               text=auto eol=lf
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+
+# Java/Kotlin исходники
+*.java          text diff=java
+*.kt            text diff=java
+*.kts           text diff=java
+*.groovy        text
+*.gradle        text diff=java
+*.gradle.kts    text diff=java
+
+# Конфигурация и шаблоны
+*.yml           text
+*.yaml          text
+*.xml           text
+*.properties    text
+*.html          text diff=html
+*.htm           text diff=html
+*.jsp           text
+*.jspf          text
+*.jspx          text
+*.tag           text
+*.tagx          text
+*.tld           text
+
+# Статические ресурсы
+*.css           text diff=css
+*.js            text
+*.json          text
+*.md            text
+*.csv           text
+*.txt           text
+
+# Скрипты
+*.sh            text eol=lf
+*.bash          text eol=lf
+
+# Бинарные файлы
+*.class         binary
+*.jar           binary
+*.war           binary
+*.ear           binary
+*.jks           binary
+*.dll           binary
+*.so            binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.ico           binary
+*.zip           binary
+*.gz            binary
+*.tar           binary
+*.pdf           binary
