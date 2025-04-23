@@ -1,0 +1,16 @@
+CREATE TABLE type
+(
+    id   BIGSERIAL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE beer
+(
+    id       VARCHAR(50) PRIMARY KEY,
+    name     VARCHAR(100)  NOT NULL,
+    producer VARCHAR(50)   NOT NULL,
+    price    DECIMAL(8, 2) NOT NULL,
+    alcohol  DECIMAL(3, 1) NOT NULL,
+    type     BIGINT        NOT NULL,
+    FOREIGN KEY (type) REFERENCES type (id)
+);

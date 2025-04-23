@@ -19,12 +19,6 @@
         <module name="pivo.test" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="21">
-      <module name="pivo.pivo" target="21" />
-      <module name="pivo.pivo.main" target="21" />
-      <module name="pivo.pivo.main~1" target="21" />
-      <module name="pivo.pivo.test" target="21" />
-      <module name="pivo.pivo.test~1" target="21" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="21" />
   </component>
 </project>
