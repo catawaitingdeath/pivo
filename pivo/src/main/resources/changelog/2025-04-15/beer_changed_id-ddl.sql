@@ -1,0 +1,3 @@
+ALTER TABLE beer
+    ALTER COLUMN id
+        TYPE VARCHAR(25);  

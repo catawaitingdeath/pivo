@@ -39,6 +39,8 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.30")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
     testImplementation("org.assertj:assertj-core:3.24.2")
+    implementation("org.liquibase:liquibase-core:4.31.1")
+    implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
 }
 
 tasks.withType<Test> {
