@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/pivo/src/main/resources/changelog/2025-04-15/beer_changed_id-ddl.sql" dialect="H2" />
-    <file url="PROJECT" dialect="PostgreSQL" />
-  </component>
-</project>
