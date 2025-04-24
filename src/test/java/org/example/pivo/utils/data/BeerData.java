@@ -1,8 +1,11 @@
 package org.example.pivo.utils.data;
 
+import org.example.pivo.components.NanoIdGenerator;
+import org.example.pivo.config.property.NanoIdProperty;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
+import org.example.pivo.utils.FileReaderUtility;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -10,88 +13,43 @@ import java.util.Objects;
 
 public class BeerData {
 
-    public static BeerEntity beerEntity(String id, String typeName) {
-
-        if (Objects.equals(typeName, "эль")) {
-            return BeerEntity.builder()
-                    .id(id)
-                    .name("Troll Brew IPA светлое нефильтрованное")
-                    .producer("Арвиай")
-                    .price(BigDecimal.valueOf(120))
-                    .alcohol(BigDecimal.valueOf(8))
-                    .type(BigInteger.valueOf(1))
-                    .build();
-        } else {
-            return BeerEntity.builder()
-                    .id(id)
-                    .name("Жигули Барное светлое фильтрованное")
-                    .producer("Московская пивоваренная компания")
-                    .price(BigDecimal.valueOf(70))
-                    .alcohol(BigDecimal.valueOf(5))
-                    .type(BigInteger.valueOf(2))
-                    .build();
-        }
+    public static BeerEntity beerEntityAle(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/beerEntityAle.json", BeerEntity.class);
+        entity.setId(id);
+        return entity;
     }
 
-    public static BeerEntity beerEntity(String typeName) {
-        if (Objects.equals(typeName, "эль")) {
-            return BeerEntity.builder()
-                    .name("Troll Brew IPA светлое нефильтрованное")
-                    .producer("Арвиай")
-                    .price(BigDecimal.valueOf(120))
-                    .alcohol(BigDecimal.valueOf(8))
-                    .type(BigInteger.valueOf(1))
-                    .build();
-        } else {
-            return BeerEntity.builder()
-                    .name("Жигули Барное светлое фильтрованное")
-                    .producer("Московская пивоваренная компания")
-                    .price(BigDecimal.valueOf(70))
-                    .alcohol(BigDecimal.valueOf(5))
-                    .type(BigInteger.valueOf(2))
-                    .build();
-        }
+    public static BeerEntity beerEntityLager(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/beerEntityLager.json", BeerEntity.class);
+        entity.setId(id);
+        return entity;
     }
 
-    public static BeerDto beerDto(String id, String typeName) {
-        if (Objects.equals(typeName, "эль")) {
-            return BeerDto.builder()
-                    .id(id)
-                    .name("Troll Brew IPA светлое нефильтрованное")
-                    .producer("Арвиай")
-                    .price(BigDecimal.valueOf(120))
-                    .alcohol(BigDecimal.valueOf(8))
-                    .typeName(typeName)
-                    .build();
-        } else {
-            return BeerDto.builder()
-                    .id(id)
-                    .name("Жигули Барное светлое фильтрованное")
-                    .producer("Московская пивоваренная компания")
-                    .price(BigDecimal.valueOf(70))
-                    .alcohol(BigDecimal.valueOf(5))
-                    .typeName(typeName)
-                    .build();
-        }
+    public static BeerEntity beerEntityAle() {
+        return FileReaderUtility.readFile("/controllerFiles/beerEntityAle.json", BeerEntity.class);
     }
 
-    public static CreateBeerDto createBeerDto(String typeName) {
-        if (Objects.equals(typeName, "лагер")) {
-            return CreateBeerDto.builder()
-                    .name("Жигули Барное светлое фильтрованное")
-                    .producer("Московская пивоваренная компания")
-                    .price(BigDecimal.valueOf(70))
-                    .alcohol(BigDecimal.valueOf(5))
-                    .typeName(typeName)
-                    .build();
-        } else {
-            return CreateBeerDto.builder()
-                    .name("Troll Brew IPA светлое нефильтрованное")
-                    .producer("Арвиай")
-                    .price(BigDecimal.valueOf(120))
-                    .alcohol(BigDecimal.valueOf(5))
-                    .typeName(typeName)
-                    .build();
-        }
+    public static BeerEntity beerEntityLager() {
+        return FileReaderUtility.readFile("/controllerFiles/beerEntityLager.json", BeerEntity.class);
+    }
+
+    public static BeerDto beerDtoAle(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/beerDtoAle.json", BeerDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
+    public static BeerDto beerDtoLager(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/beerDtoLager.json", BeerDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
+    public static CreateBeerDto createBeerDtoAle() {
+        return FileReaderUtility.readFile("/controllerFiles/createBeerDtoAle.json", CreateBeerDto.class);
+    }
+
+    public static CreateBeerDto createBeerDtoLager() {
+        return FileReaderUtility.readFile("/controllerFiles/createBeerDtoLager.json", CreateBeerDto.class);
     }
 }

@@ -6,31 +6,17 @@ import java.math.BigInteger;
 
 public class TypeData {
 
-    public static TypeEntity typeEntity(BigInteger id, String name) {
+    public static TypeEntity typeEntityLager(BigInteger id) {
         return TypeEntity.builder()
                 .id(id)
-                .name(name)
+                .name("лагер")
                 .build();
     }
 
-//    public static TypeEntity newTypeEntityWithId(String typeName) {
-//        if(Objects.equals(typeName, "lager")){
-//            return TypeEntity.builder()
-//                    .id(1L)
-//                    .name("lager")
-//                    .build();
-//        }
-//        else{
-//            return TypeEntity.builder()
-//                    .id(2L)
-//                    .name("ale")
-//                    .build();
-//        }
-//    }
-//
-//    public static TypeEntity newTypeEntity(String typeName) {
-//        return TypeEntity.builder()
-//                .name(typeName)
-//                .build();
-//    }
+    public static TypeEntity typeEntityAle(BigInteger id) {
+        return TypeEntity.builder()
+                .id(id)
+                .name("эль")
+                .build();
+    }
 }
