@@ -1,0 +1,6 @@
+CREATE TABLE store
+(
+    id VARCHAR(50) PRIMARY KEY,
+    address VARCHAR(50) NOT NULL,
+    phone VARCHAR(25) NOT NULL
+);

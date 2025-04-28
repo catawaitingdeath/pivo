@@ -14,42 +14,42 @@ import java.util.Objects;
 public class BeerData {
 
     public static BeerEntity beerEntityAle(String id) {
-        var entity = FileReaderUtility.readFile("/controllerFiles/beerEntityAle.json", BeerEntity.class);
+        var entity = FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityAle.json", BeerEntity.class);
         entity.setId(id);
         return entity;
     }
 
     public static BeerEntity beerEntityLager(String id) {
-        var entity = FileReaderUtility.readFile("/controllerFiles/beerEntityLager.json", BeerEntity.class);
+        var entity = FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityLager.json", BeerEntity.class);
         entity.setId(id);
         return entity;
     }
 
     public static BeerEntity beerEntityAle() {
-        return FileReaderUtility.readFile("/controllerFiles/beerEntityAle.json", BeerEntity.class);
+        return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityAle.json", BeerEntity.class);
     }
 
     public static BeerEntity beerEntityLager() {
-        return FileReaderUtility.readFile("/controllerFiles/beerEntityLager.json", BeerEntity.class);
+        return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityLager.json", BeerEntity.class);
     }
 
     public static BeerDto beerDtoAle(String id) {
-        var dto = FileReaderUtility.readFile("/controllerFiles/beerDtoAle.json", BeerDto.class);
+        var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoAle.json", BeerDto.class);
         dto.setId(id);
         return dto;
     }
 
     public static BeerDto beerDtoLager(String id) {
-        var dto = FileReaderUtility.readFile("/controllerFiles/beerDtoLager.json", BeerDto.class);
+        var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoLager.json", BeerDto.class);
         dto.setId(id);
         return dto;
     }
 
     public static CreateBeerDto createBeerDtoAle() {
-        return FileReaderUtility.readFile("/controllerFiles/createBeerDtoAle.json", CreateBeerDto.class);
+        return FileReaderUtility.readFile("/controllerFiles/createBeer/createBeerDtoAle.json", CreateBeerDto.class);
     }
 
     public static CreateBeerDto createBeerDtoLager() {
-        return FileReaderUtility.readFile("/controllerFiles/createBeerDtoLager.json", CreateBeerDto.class);
+        return FileReaderUtility.readFile("/controllerFiles/createBeer/createBeerDtoLager.json", CreateBeerDto.class);
     }
 }

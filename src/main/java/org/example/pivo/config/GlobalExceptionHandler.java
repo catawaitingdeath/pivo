@@ -49,7 +49,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return processing(ex, request, status, null, null);
     }
 
-
     @SuppressWarnings("unused")
     private ResponseEntity<Object> processing(
             Throwable ex,

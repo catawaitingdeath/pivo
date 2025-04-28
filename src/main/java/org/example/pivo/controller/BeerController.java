@@ -1,5 +1,8 @@
 package org.example.pivo.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -36,11 +39,12 @@ public class BeerController {
 
     @GetMapping("/{id}")
     public BeerDto getBeer(@NotBlank @PathVariable String id) {
-        return beerService.get(id).orElse(null);
+        return beerService.get(id);
     }
 
+    @Operation(summary = "Поиск пива, у которого цена больше или равна переданной и алкоголь равен переданному")
     @GetMapping("/custom")
-    public List<BeerEntity> getBeer(@RequestParam BigDecimal price, @RequestParam BigDecimal alcohol) {
+    public List<BeerEntity> getBeer(@RequestParam @Parameter(description = "Миниальная цена искомого пива", example = "100.99") BigDecimal price, @RequestParam BigDecimal alcohol) {
         return beerService.custom(price, alcohol);
     }
 }

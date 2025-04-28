@@ -41,6 +41,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     implementation("org.liquibase:liquibase-core:4.31.1")
     implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 }
 
 tasks.withType<Test> {

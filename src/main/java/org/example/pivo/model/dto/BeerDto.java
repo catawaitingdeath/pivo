@@ -1,5 +1,6 @@
 package org.example.pivo.model.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class BeerDto {
 
+    @Schema(example = "W_cPwW5eqk9kxe2OxgivJzVgu", description = "Id в формате NanoId")
     @NotBlank
     @Size(min = 25, max = 25)
     private String id;

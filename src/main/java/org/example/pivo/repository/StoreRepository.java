@@ -9,5 +9,4 @@ import java.util.Optional;
 @Repository
 public interface StoreRepository extends CrudRepository<StoreEntity, String> {
 
-    Optional<StoreEntity> findById(String id);
 }

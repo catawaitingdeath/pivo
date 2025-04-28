@@ -2,10 +2,12 @@ package org.example.pivo.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.mapper.StoreMapper;
-import org.example.pivo.model.dto.AnotherStoreDto;
+import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.repository.StoreRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,7 @@ public class StoreService {
     private final StoreMapper storeMapper;
 
 
-    public StoreDto create(AnotherStoreDto store) {
+    public StoreDto create(CreateStoreDto store) {
         var storeEntity = storeMapper.toEntity(store);
         storeEntity = storeRepository.save(storeEntity);
         return storeMapper.toDto(storeEntity);
@@ -31,11 +33,9 @@ public class StoreService {
         return result;
     }
 
-    public Optional<StoreDto> get(String id) {
-        var storeEntity = storeRepository.findById(id).stream()
-                .findFirst()
-                .orElseThrow(()-> new RuntimeException("Предоставлен неверный id"));
-        var storeDto = storeMapper.toDto(storeEntity);
-        return Optional.of(storeDto);
+    public StoreDto get(String id) {
+        return storeRepository.findById(id)
+                .map(storeMapper::toDto)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Предоставлен неверный id"));
     }
 }

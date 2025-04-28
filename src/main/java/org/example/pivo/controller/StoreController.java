@@ -3,7 +3,7 @@ package org.example.pivo.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.example.pivo.model.dto.AnotherStoreDto;
+import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.service.StoreService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,16 +22,15 @@ public class StoreController {
     private final StoreService storeService;
 
     @PostMapping
-    public StoreDto post(@Valid @RequestBody AnotherStoreDto storeDto) {
+    public StoreDto post(@Valid @RequestBody CreateStoreDto storeDto) {
         return storeService.create(storeDto);
     }
 
     @GetMapping
-    public List<StoreDto> getAll() {
-        return storeService.getAll();
-    }
+    public List<StoreDto> getAll() {return storeService.getAll();}
 
     @GetMapping("/{id}")
     public StoreDto getStore(@NotBlank @PathVariable String id) {
-        return storeService.get(id).orElse(null);
+        return storeService.get(id);
+    }
 }

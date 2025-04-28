@@ -3,6 +3,7 @@ package org.example.pivo.model.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.pivo.components.NanoIdGenerator;
 
 @Data
 @Entity
@@ -31,5 +33,12 @@ public class StoreEntity {
     @NotBlank(message = "Поле не может быть пустым")
     @Size(max = 25, message = "Телефон магазина не должен содержать больше 25 символов")
     private String phone;
+
+    @PrePersist
+    void prePersist() {
+        if (id == null) {
+            id = NanoIdGenerator.gen();
+        }
+    }
 
 }

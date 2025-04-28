@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnotherStoreDto {
-
+public class CreateStoreDto {
     @NotBlank(message = "Поле не может быть пустым")
     @Size(max = 50, message = "Адрес магазина не должен содержать больше 50 символов")
     private String address;

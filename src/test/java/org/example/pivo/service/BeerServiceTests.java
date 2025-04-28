@@ -122,7 +122,7 @@ public class BeerServiceTests {
         var actual = beerService.get(idLager);
         assertThat(actual)
                 .isNotNull()
-                .isEqualTo(Optional.of(beerDto));
+                .isEqualTo(beerDto);
     }
 
     @Test
