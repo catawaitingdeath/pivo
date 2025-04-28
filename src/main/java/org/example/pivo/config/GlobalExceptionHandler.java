@@ -1,6 +1,7 @@
 package org.example.pivo.config;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.example.pivo.model.exceptions.ErrorResponse;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
@@ -41,6 +43,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {Throwable.class})
     public ResponseEntity<Object> handleException(Throwable ex, WebRequest request) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        if (ex.getClass().isAnnotationPresent(ResponseStatus.class)) {
+            status = ex.getClass().getAnnotation(ResponseStatus.class).value();
+        }
         return processing(ex, request, status, null, null);
     }
 
@@ -57,12 +62,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if (request instanceof ServletWebRequest r) {
             path = r.getRequest().getRequestURI();
         }
+        var message = ex.getMessage();
+        if (StringUtils.isBlank(message)) {
+            message = HttpStatus.valueOf(status.value()).getReasonPhrase();
+        }
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(OffsetDateTime.now())
                 .status(status.value())
                 .error(ex.getClass().getSimpleName())
                 .path(path)
-                .message(ex.getMessage())
+                .message(message)
                 .build();
         return ResponseEntity
                 .status(response.getStatus())
