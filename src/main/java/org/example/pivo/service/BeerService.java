@@ -29,7 +29,7 @@ public class BeerService {
     public BeerDto create(CreateBeerDto beer) {
         BeerEntity beerEntity = beerMapper.toEntity(beer);
         var typeEntity = typeRepository.findByName(beer.getTypeName())
-                .orElseThrow(() -> new RuntimeException("Тип не найден"));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Тип не найден"));
         beerEntity.setType(typeEntity.getId());
         beerEntity = beerRepository.save(beerEntity);
         return beerMapper.toDto(beerEntity, typeEntity);

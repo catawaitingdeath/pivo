@@ -23,22 +23,27 @@ public class BeerDto {
     @Size(min = 25, max = 25)
     private String id;
 
+    @Schema(example = "Жигули Барное светлое фильтрованное", description = "Название пива с большой буквы")
     @NotBlank(message = "Поле не может быть пустым")
     @Size(max = 100, message = "Название пива не должно содержать больше 100 символов")
     private String name;
 
+    @Schema(example = "Московская пивоваренная компания", description = "Название производителя с большой буквы")
     @NotBlank(message = "Поле не может быть пустым")
     @Size(max = 50, message = "Имя производителя пива не должно содержать больше 50 символов")
     private String producer;
 
+    @Schema(example = "60", description = "Цена пива в рублях (формат BigDecimal)")
     @NotNull
     @Positive(message = "Цена пива должна быть положительной")
     private BigDecimal price;
 
+    @Schema(example = "4.5", description = "Процент алкоголя в пиве (формат BigDecimal)")
     @NotNull
     @Positive(message = "Процентное содержание алкоголя должно быть положительным")
     private BigDecimal alcohol;
 
+    @Schema(example = "лагер", description = "Тип пива с маленькой буквы")
     @NotBlank(message = "Поле не может быть пустым")
     @Size(max = 20, message = "Тип пива не должен содержать больше 20 символов")
     private String typeName;
