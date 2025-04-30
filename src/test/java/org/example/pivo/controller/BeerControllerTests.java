@@ -62,8 +62,8 @@ public class BeerControllerTests {
 
     @Test
     void getAllTest() throws Exception {
-        var beerEntity1 = BeerData.beerEntity("лагер");
-        var beerEntity2 = BeerData.beerEntity("эль");
+        var beerEntity1 = BeerData.beerEntityLager();
+        var beerEntity2 = BeerData.beerEntityAle();
         beerRepository.save(beerEntity1);
         beerRepository.save(beerEntity2);
         mockMvc.perform(MockMvcRequestBuilders.get("/beer")
@@ -75,7 +75,7 @@ public class BeerControllerTests {
 
     @Test
     void getBeerTest() throws Exception {
-        var createBeerDto = BeerData.createBeerDto("лагер");
+        var createBeerDto = BeerData.createBeerDtoLager();
         var id = beerService.create(createBeerDto).getId();
         String jsonBeer = objectMapper.writeValueAsString(createBeerDto);
         mockMvc.perform(MockMvcRequestBuilders.get("/beer/{id}", id)
@@ -86,8 +86,8 @@ public class BeerControllerTests {
 
     @Test
     void customTest() throws Exception {
-        var createBeerDtoLager = BeerData.createBeerDto("лагер");
-        var createBeerDtoAle = BeerData.createBeerDto("эль");
+        var createBeerDtoLager = BeerData.createBeerDtoLager();
+        var createBeerDtoAle = BeerData.createBeerDtoAle();
         var idLager = beerService.create(createBeerDtoLager).getId();
         var idAle = beerService.create(createBeerDtoAle).getId();
         var expectedList = List.of(beerRepository.findById(idLager).get(), beerRepository.findById(idAle).get());

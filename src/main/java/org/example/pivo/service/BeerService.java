@@ -8,7 +8,9 @@ import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.TypeEntity;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class BeerService {
     public BeerDto create(CreateBeerDto beer) {
         BeerEntity beerEntity = beerMapper.toEntity(beer);
         var typeEntity = typeRepository.findByName(beer.getTypeName())
-                .orElseThrow(() -> new RuntimeException("Тип не найден"));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Тип не найден"));
         beerEntity.setType(typeEntity.getId());
         beerEntity = beerRepository.save(beerEntity);
         return beerMapper.toDto(beerEntity, typeEntity);
@@ -47,16 +49,11 @@ public class BeerService {
         return result;
     }
 
-    public Optional<BeerDto> get(String id) {
-        var beerEntity = beerRepository.findById(id).stream()
-                .findFirst()
-                .orElse(null);
-        if (beerEntity == null) {
-            throw new RuntimeException("Предоставлен неверный id");
-        }
-        var beerDto = beerMapper.toDto(
+    public BeerDto get(String id) {
+        var beerEntity = beerRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Предоставлен неверный id"));
+        return beerMapper.toDto(
                 beerEntity, typeRepository.findById(beerEntity.getType()).get());
-        return Optional.of(beerDto);
     }
 
     public List<BeerEntity> custom(BigDecimal price, BigDecimal alcohol) {

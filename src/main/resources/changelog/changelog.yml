@@ -5,4 +5,7 @@ databaseChangeLog:
       file: changelog/2025-04-15/type-dml.sql
   - include:
       file: changelog/2025-04-15/beer_changed_id-ddl.sql
+  - include:
+      file: changelog/2025-04-25/store-ddl.sql
+
 
