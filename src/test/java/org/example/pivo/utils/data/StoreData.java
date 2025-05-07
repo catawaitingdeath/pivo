@@ -1,10 +1,8 @@
 package org.example.pivo.utils.data;
 
-import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.StoreEntity;
 import org.example.pivo.model.dto.CreateStoreDto;
-import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.utils.FileReaderUtility;
 
 public class StoreData {

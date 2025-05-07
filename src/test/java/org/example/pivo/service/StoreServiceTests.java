@@ -90,7 +90,7 @@ public class StoreServiceTests {
 
     @Test
     @DisplayName("Return a store")
-    void getBeer_ReturnBeer() {
+    void getStore_ReturnStore() {
         var storeDto = StoreData.storeDto1(id1);
 
         Mockito.doReturn(Optional.of(StoreData.storeEntity1(id1))).when(mockStoreRepository).findById(id1);
@@ -103,12 +103,12 @@ public class StoreServiceTests {
 
     @Test
     @DisplayName("Return error: Предоставлен неверный id")
-    void getBeer_ThrowError() {
+    void getStore_ThrowError() {
         Mockito.doReturn(Optional.empty()).when(mockStoreRepository).findById("0");
 
         var exception = assertThrows(RuntimeException.class, () -> storeService.get("0"));
         assertThat(exception.getMessage())
-                .isEqualTo("404 NOT_FOUND \"Предоставлен неверный id\"");
+                .isEqualTo("Предоставлен неверный id");
     }
 
 }

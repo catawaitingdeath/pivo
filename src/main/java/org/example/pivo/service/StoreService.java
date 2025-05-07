@@ -5,6 +5,7 @@ import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.exceptions.NotFoundPivoException;
+import org.example.pivo.model.exceptions.NotFoundStoreException;
 import org.example.pivo.repository.StoreRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,6 @@ public class StoreService {
     public StoreDto get(String id) {
         return storeRepository.findById(id)
                 .map(storeMapper::toDto)
-                .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
+                .orElseThrow(()-> new NotFoundStoreException("Предоставлен неверный id"));
     }
 }
