@@ -3,6 +3,7 @@ package org.example.pivo.service;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
 import org.example.pivo.utils.data.BeerData;
@@ -130,7 +131,7 @@ public class BeerServiceTests {
     void getBeer_ThrowError() {
         Mockito.doReturn(Optional.empty()).when(mockBeerRepository).findById("0");
 
-        var exception = assertThrows(RuntimeException.class, () -> beerService.get("0"));
+        var exception = assertThrows(NotFoundPivoException.class, () -> beerService.get("0"));
         assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }

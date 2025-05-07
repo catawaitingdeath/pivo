@@ -2,6 +2,7 @@ package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
+import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.service.StoreService;
 import org.example.pivo.utils.data.BeerData;
@@ -13,10 +14,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -24,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "tests")
+@ContextConfiguration(initializers = {PostgresInitializer.class})
 public class StoreControllerTests {
 
     @Autowired
@@ -32,8 +36,6 @@ public class StoreControllerTests {
     private StoreRepository storeRepository;
     @Autowired
     private StoreService storeService;
-    @Autowired
-    private ObjectMapper jacksonObjectMapper;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -53,7 +55,7 @@ public class StoreControllerTests {
                                 }"""))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         var store = storeRepository.findAll();
-        Assertions.assertThat(store)
+        assertThat(store)
                 .hasSize(1);
     }
 

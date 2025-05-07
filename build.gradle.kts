@@ -24,9 +24,10 @@ repositories {
 }
 
 dependencies {
+    implementation("org.postgresql:postgresql:42.7.5")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")
-    runtimeOnly("com.h2database:h2")
+    testImplementation("org.testcontainers:postgresql:1.21.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

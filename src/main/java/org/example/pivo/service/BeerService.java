@@ -6,6 +6,7 @@ import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.TypeEntity;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class BeerService {
     public BeerDto create(CreateBeerDto beer) {
         BeerEntity beerEntity = beerMapper.toEntity(beer);
         var typeEntity = typeRepository.findByName(beer.getTypeName())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Тип не найден"));
+                .orElseThrow(()-> new NotFoundPivoException("Тип не найден"));
         beerEntity.setType(typeEntity.getId());
         beerEntity = beerRepository.save(beerEntity);
         return beerMapper.toDto(beerEntity, typeEntity);
@@ -51,7 +52,7 @@ public class BeerService {
 
     public BeerDto get(String id) {
         var beerEntity = beerRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Предоставлен неверный id"));
+                .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
         return beerMapper.toDto(
                 beerEntity, typeRepository.findById(beerEntity.getType()).get());
     }
