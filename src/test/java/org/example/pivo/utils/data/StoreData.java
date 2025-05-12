@@ -43,7 +43,7 @@ public class StoreData {
         return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDto1.json", CreateStoreDto.class);
     }
 
-    public static CreateStoreDto CreateStoreDto2() {
+    public static CreateStoreDto createStoreDto2() {
         return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDto2.json", CreateStoreDto.class);
     }
 }

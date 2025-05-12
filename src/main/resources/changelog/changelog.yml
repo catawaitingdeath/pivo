@@ -7,5 +7,9 @@ databaseChangeLog:
       file: changelog/2025-04-15/beer_changed_id-ddl.sql
   - include:
       file: changelog/2025-04-25/store-ddl.sql
+  - include:
+      file: changelog/2025-05-07/storage-ddl.sql
+  - include:
+      file: changelog/2025-05-12/storage_changed_id-ddl.sql
 
 

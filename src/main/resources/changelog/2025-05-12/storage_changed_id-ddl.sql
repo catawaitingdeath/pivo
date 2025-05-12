@@ -1,0 +1,3 @@
+ALTER TABLE storage
+ALTER COLUMN id
+        TYPE VARCHAR(25);
