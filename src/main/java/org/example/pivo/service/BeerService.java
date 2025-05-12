@@ -1,6 +1,7 @@
 package org.example.pivo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
@@ -59,5 +60,16 @@ public class BeerService {
 
     public List<BeerEntity> custom(BigDecimal price, BigDecimal alcohol) {
         return beerRepository.findAllByPriceGreaterThanAndAlcoholOrderByPriceDesc(price, alcohol);
+    }
+
+    public List<BeerDto> caseInsensitiveSearch(String name) {
+        List<BeerDto> result = new ArrayList<>();
+        var beers = getAll();
+        for (var beer : beers) {
+            if (StringUtils.containsIgnoreCase(beer.getName(), name)) {
+                result.add(beer);
+            }
+        }
+        return result;
     }
 }

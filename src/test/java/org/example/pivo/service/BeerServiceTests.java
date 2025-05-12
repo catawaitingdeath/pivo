@@ -135,4 +135,21 @@ public class BeerServiceTests {
         assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }
+
+    @Test
+    void searchTest(){
+        var beerEntityLager = BeerData.beerEntityLager(idLager);
+        var beerEntityAle = BeerData.beerEntityAle(idAle);
+        List<BeerEntity> beerEntityList = new ArrayList<>();
+        beerEntityList.add(beerEntityAle);
+        beerEntityList.add(beerEntityLager);
+
+        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
+
+        var name = "Oll";
+        var actual = beerService.caseInsensitiveSearch(name);
+        assertThat(actual)
+                .isNotNull()
+                .hasSize(1);
+    }
 }
