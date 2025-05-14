@@ -1,6 +1,7 @@
 package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
@@ -23,7 +24,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -77,7 +77,7 @@ public class StorageControllerTests {
                         .content(contentString))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         var storage = storageRepository.findAll();
-        assertThat(storage)
+        Assertions.assertThat(storage)
                 .hasSize(1);
     }
 

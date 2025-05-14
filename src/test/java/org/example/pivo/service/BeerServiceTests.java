@@ -1,5 +1,6 @@
 package org.example.pivo.service;
 
+import org.assertj.core.api.Assertions;
 import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
@@ -22,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -55,7 +55,7 @@ public class BeerServiceTests {
         Mockito.doReturn(beerEntity).when(mockBeerRepository).save(beerEntityNullId);
 
         var actual = beerService.create(createBeerDto);
-        assertThat(actual)
+        Assertions.assertThat(actual)
                 .isNotNull()
                 .isEqualTo(beerDto);
         Mockito.verify(mockTypeRepository, Mockito.times(0)).save(Mockito.any());
@@ -96,7 +96,7 @@ public class BeerServiceTests {
         Mockito.doReturn(Optional.of(typeEntityAle)).when(mockTypeRepository).findById(BigInteger.valueOf(1));
 
         var actual = beerService.getAll();
-        assertThat(actual)
+        Assertions.assertThat(actual)
                 .isNotNull()
                 .containsExactlyInAnyOrderElementsOf(beerDtoList);
     }
@@ -109,7 +109,7 @@ public class BeerServiceTests {
         Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
 
         var actual = beerService.getAll();
-        assertThat(actual)
+        Assertions.assertThat(actual)
                 .isNotNull()
                 .isEmpty();
     }
@@ -124,7 +124,7 @@ public class BeerServiceTests {
         Mockito.doReturn(Optional.of(typeEntity)).when(mockTypeRepository).findById(BigInteger.valueOf(2));
 
         var actual = beerService.get(idLager);
-        assertThat(actual)
+        Assertions.assertThat(actual)
                 .isNotNull()
                 .isEqualTo(beerDto);
     }
@@ -135,7 +135,7 @@ public class BeerServiceTests {
         Mockito.doReturn(Optional.empty()).when(mockBeerRepository).findById("0");
 
         var exception = assertThrows(NotFoundPivoException.class, () -> beerService.get("0"));
-        assertThat(exception.getMessage())
+        Assertions.assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }
 
@@ -152,7 +152,7 @@ public class BeerServiceTests {
 
         var name = "OlL";
         var actual = beerService.caseInsensitiveSearch(name);
-        assertThat(actual)
+        Assertions.assertThat(actual)
                 .isNotNull()
                 .hasSize(1);
     }
@@ -170,7 +170,7 @@ public class BeerServiceTests {
 
         var name = "Garage";
         var actual = beerService.caseInsensitiveSearch(name);
-        assertThat(actual)
+        Assertions.assertThat(actual)
                 .isEmpty();
     }
 
@@ -183,14 +183,14 @@ public class BeerServiceTests {
         Specification<BeerEntity> spec = Specification.where(BeerSpecification.alcoholBetween(BigDecimal.valueOf(5), BigDecimal.valueOf(5))
                 .and(BeerSpecification.priceBetween(BigDecimal.valueOf(10), BigDecimal.valueOf(80))));
 
-        Mockito.doReturn(beerDtoList).when(mockBeerRepository).findAll(spec);
+        Mockito.doReturn(beerDtoList).when(mockBeerRepository).findAll(Mockito.any());
 
         var minPrice = BigDecimal.valueOf(10);
         var maxPrice = BigDecimal.valueOf(80);
         var minAlcohol = BigDecimal.valueOf(5);
         var maxAlcohol = BigDecimal.valueOf(5);
         var actual = beerService.searchByCriteria(null, minAlcohol, maxAlcohol, minPrice, maxPrice, null);
-        assertThat(actual)
+        Assertions.assertThat(actual)
                 .isNotNull()
                 .isEqualTo(beerDtoList);
     }
