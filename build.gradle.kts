@@ -24,9 +24,10 @@ repositories {
 }
 
 dependencies {
+    implementation("org.postgresql:postgresql:42.7.5")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")
-    runtimeOnly("com.h2database:h2")
+    testImplementation("org.testcontainers:postgresql:1.21.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -38,10 +39,12 @@ dependencies {
     implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     testCompileOnly("org.projectlombok:lombok:1.18.30")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
-    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("org.assertj:assertj-core:3.27.3")
     implementation("org.liquibase:liquibase-core:4.31.1")
     implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+    testImplementation("org.skyscreamer:jsonassert:1.5.0")
+    testImplementation("net.javacrumbs.json-unit:json-unit-spring:4.1.1")
 }
 
 tasks.withType<Test> {

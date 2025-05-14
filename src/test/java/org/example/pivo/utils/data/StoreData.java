@@ -1,10 +1,8 @@
 package org.example.pivo.utils.data;
 
-import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.StoreEntity;
 import org.example.pivo.model.dto.CreateStoreDto;
-import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.utils.FileReaderUtility;
 
 public class StoreData {
@@ -45,7 +43,7 @@ public class StoreData {
         return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDto1.json", CreateStoreDto.class);
     }
 
-    public static CreateStoreDto CreateStoreDto2() {
+    public static CreateStoreDto createStoreDto2() {
         return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDto2.json", CreateStoreDto.class);
     }
 }
