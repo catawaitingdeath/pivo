@@ -1,6 +1,8 @@
 package org.example.pivo.repository;
 
 import org.example.pivo.model.entity.BeerEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
@@ -19,4 +21,6 @@ public interface BeerRepository extends CrudRepository<BeerEntity, String>, JpaS
     List<BeerEntity> findAllByProducer(String producer);
 
     List<BeerEntity> findAll(Specification<BeerEntity> spec);
+
+    Page<BeerEntity> findAll(Pageable pageable);
 }

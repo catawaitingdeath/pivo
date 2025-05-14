@@ -183,7 +183,7 @@ public class BeerServiceTests {
         Specification<BeerEntity> spec = Specification.where(BeerSpecification.alcoholBetween(BigDecimal.valueOf(5), BigDecimal.valueOf(5))
                 .and(BeerSpecification.priceBetween(BigDecimal.valueOf(10), BigDecimal.valueOf(80))));
 
-        Mockito.doReturn(beerDtoList).when(mockBeerRepository).findAll(Mockito.any());
+        //Mockito.doReturn(beerDtoList).when(mockBeerRepository).findAll(Mockito.any());
 
         var minPrice = BigDecimal.valueOf(10);
         var maxPrice = BigDecimal.valueOf(80);

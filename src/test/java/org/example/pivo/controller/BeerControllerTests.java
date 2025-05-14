@@ -2,6 +2,7 @@ package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
+import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.repository.BeerRepository;
@@ -22,7 +23,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -64,7 +64,7 @@ public class BeerControllerTests {
                                 }"""))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         var pivo = beerRepository.findAll();
-        assertThat(pivo)
+        Assertions.assertThat(pivo)
                 .hasSize(1);
     }
 

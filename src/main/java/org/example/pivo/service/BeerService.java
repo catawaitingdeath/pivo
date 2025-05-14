@@ -11,6 +11,9 @@ import org.example.pivo.model.entity.TypeEntity;
 import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -40,9 +43,9 @@ public class BeerService {
         return beerMapper.toDto(beerEntity, typeEntity);
     }
 
-    public List<BeerDto> getAll() {
+    public Page<BeerDto> getAll() {
         var result = new ArrayList<BeerDto>();
-        var beers = beerRepository.findAll();
+        var beers = beerRepository.findAll(PageRequest.of(0, 100));
         var beerTypes = beers.stream()
                 .map(BeerEntity::getType)
                 .distinct()
@@ -50,8 +53,9 @@ public class BeerService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toMap(TypeEntity::getId, Function.identity()));
+
         beers.forEach(t -> result.add(beerMapper.toDto(t, beerTypes.get(t.getType()))));
-        return result;
+        return new PageImpl<>(result, beers.getPageable(), beers.getTotalElements());
     }
 
     public BeerDto get(String id) {
