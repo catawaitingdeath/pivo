@@ -43,27 +43,19 @@ public class StorageControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private StoreService storeService;
-    @Autowired
     private StoreRepository storeRepository;
     @Autowired
     private BeerRepository beerRepository;
-    @Autowired
-    private BeerService beerService;
-    private String beerId1;
-    private String beerId2;
-    private String storeId1;
-    private String storeId2;
+    private String beerId1 = "2IVPACIrIT-Tr2Gw-JoApXZKT";
+    private String beerId2 = "Ota-_XO_6Dc2nCKEU7LEmsi1K";
+    private String storeId1 = "S7TKIwtHDfoLOESVj16e_v3ie";
+    private String storeId2 = "inSV3fZx2Ai1bn0CjaDvFkIxw";
 
     @BeforeEach
     public void setUp() {
         storageRepository.deleteAll();
         storeRepository.deleteAll();
         beerRepository.deleteAll();
-        storeId1 = storeService.create(StoreData.createStoreDto1()).getId();
-        storeId2 = storeService.create(StoreData.createStoreDto2()).getId();
-        beerId1 = beerService.create(BeerData.createBeerDtoAle()).getId();
-        beerId2 = beerService.create(BeerData.createBeerDtoLager()).getId();
     }
 
     @Test

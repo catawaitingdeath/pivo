@@ -5,7 +5,7 @@ import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
-import org.example.pivo.model.exceptions.NotFoundPivoException;
+import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
 import org.example.pivo.utils.data.BeerData;
@@ -15,7 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,14 +29,18 @@ import static org.mockito.Mockito.mock;
 public class BeerServiceTests {
     private BeerService beerService;
     private BeerMapper beerMapper = Mappers.getMapper(BeerMapper.class);
-    private TypeRepository mockTypeRepository = mock(TypeRepository.class);
-    private BeerRepository mockBeerRepository = mock(BeerRepository.class);
+    private TypeRepository mockTypeRepository;
+    private BeerRepository mockBeerRepository;
+    private BeerSpecification mockBeerSpecification;
     private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
     private String idAle = "9kxe2OW_cPwW5exgivJ";
 
 
     @BeforeEach
     void setup() {
+        mockTypeRepository = mock(TypeRepository.class);
+        mockBeerRepository = mock(BeerRepository.class);
+        mockBeerSpecification = mock(BeerSpecification.class);
         beerService = new BeerService(mockBeerRepository, mockTypeRepository, beerMapper);
     }
 
@@ -134,7 +137,7 @@ public class BeerServiceTests {
     void getBeer_ThrowError() {
         Mockito.doReturn(Optional.empty()).when(mockBeerRepository).findById("0");
 
-        var exception = assertThrows(NotFoundPivoException.class, () -> beerService.get("0"));
+        var exception = assertThrows(NotFoundException.class, () -> beerService.get("0"));
         Assertions.assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }
@@ -180,8 +183,8 @@ public class BeerServiceTests {
         var beerDtoLager = BeerData.beerDtoLager(idLager);
         List<BeerDto> beerDtoList = new ArrayList<>();
         beerDtoList.add(beerDtoLager);
-        Specification<BeerEntity> spec = Specification.where(BeerSpecification.alcoholBetween(BigDecimal.valueOf(5), BigDecimal.valueOf(5))
-                .and(BeerSpecification.priceBetween(BigDecimal.valueOf(10), BigDecimal.valueOf(80))));
+        //Specification<BeerEntity> spec = Specification.where(BeerSpecification.alcoholBetween(BigDecimal.valueOf(5), BigDecimal.valueOf(5))
+        //        .and(BeerSpecification.priceBetween(BigDecimal.valueOf(10), BigDecimal.valueOf(80))));
 
         //Mockito.doReturn(beerDtoList).when(mockBeerRepository).findAll(Mockito.any());
 

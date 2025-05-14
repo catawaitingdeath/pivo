@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.pivo.mapper.StorageMapper;
 import org.example.pivo.model.dto.CreateStorageDto;
 import org.example.pivo.model.dto.StorageDto;
-import org.example.pivo.model.exceptions.NotFoundStorageException;
+import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.StorageRepository;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +34,6 @@ public class StorageService {
     public StorageDto get(String id) {
         return storageRepository.findById(id)
                 .map(storageMapper::toDto)
-                .orElseThrow(()-> new NotFoundStorageException("Предоставлен неверный id"));
+                .orElseThrow(()-> new NotFoundException("Предоставлен неверный id"));
     }
 }
