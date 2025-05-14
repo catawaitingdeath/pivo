@@ -39,10 +39,12 @@ dependencies {
     implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     testCompileOnly("org.projectlombok:lombok:1.18.30")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
-    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("org.assertj:assertj-core:3.27.3")
     implementation("org.liquibase:liquibase-core:4.31.1")
     implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+    testImplementation("org.skyscreamer:jsonassert:1.5.0")
+    testImplementation("net.javacrumbs.json-unit:json-unit-spring:4.1.1")
 }
 
 tasks.withType<Test> {

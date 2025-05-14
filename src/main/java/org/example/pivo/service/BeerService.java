@@ -2,6 +2,7 @@ package org.example.pivo.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
@@ -10,6 +11,7 @@ import org.example.pivo.model.entity.TypeEntity;
 import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,4 +75,26 @@ public class BeerService {
         }
         return result;
     }
+
+    public List<BeerDto> searchByCriteria(String producer, BigDecimal minAlcohol, BigDecimal maxAlcohol, BigDecimal minPrice, BigDecimal maxPrice,String type) {
+        Specification<BeerEntity> spec = Specification.where(null);
+
+        if (producer != null) {
+            spec = spec.and(BeerSpecification.hasProducer(producer));
+        }
+        if (minAlcohol != null && maxAlcohol != null) {
+            spec = spec.and(BeerSpecification.alcoholBetween(minAlcohol, maxAlcohol));
+        }
+        if (minPrice != null && maxPrice != null) {
+            spec = spec.and(BeerSpecification.priceBetween(minPrice, maxPrice));
+        }
+        if (type != null) {
+            spec = spec.and(BeerSpecification.hasType(type));
+        }
+        List<BeerEntity> all = beerRepository.findAll(spec);
+        return all.stream()
+                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType()).get()))
+                .toList();
+    }
+
 }

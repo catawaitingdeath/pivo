@@ -1,5 +1,6 @@
 package org.example.pivo.service;
 
+import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
+import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +140,8 @@ public class BeerServiceTests {
     }
 
     @Test
-    void searchTest(){
+    @DisplayName("Return a full list")
+    void searchByNameTest_Success() {
         var beerEntityLager = BeerData.beerEntityLager(idLager);
         var beerEntityAle = BeerData.beerEntityAle(idAle);
         List<BeerEntity> beerEntityList = new ArrayList<>();
@@ -146,10 +150,48 @@ public class BeerServiceTests {
 
         Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
 
-        var name = "Oll";
+        var name = "OlL";
         var actual = beerService.caseInsensitiveSearch(name);
         assertThat(actual)
                 .isNotNull()
                 .hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Return an empty list")
+    void searchByNameTest_Fail() {
+        var beerEntityLager = BeerData.beerEntityLager(idLager);
+        var beerEntityAle = BeerData.beerEntityAle(idAle);
+        List<BeerEntity> beerEntityList = new ArrayList<>();
+        beerEntityList.add(beerEntityAle);
+        beerEntityList.add(beerEntityLager);
+
+        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
+
+        var name = "Garage";
+        var actual = beerService.caseInsensitiveSearch(name);
+        assertThat(actual)
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("Return result")
+    void searchByCriteriaTest_Success() {
+        var beerDtoLager = BeerData.beerDtoLager(idLager);
+        List<BeerDto> beerDtoList = new ArrayList<>();
+        beerDtoList.add(beerDtoLager);
+        Specification<BeerEntity> spec = Specification.where(BeerSpecification.alcoholBetween(BigDecimal.valueOf(5), BigDecimal.valueOf(5))
+                .and(BeerSpecification.priceBetween(BigDecimal.valueOf(10), BigDecimal.valueOf(80))));
+
+        Mockito.doReturn(beerDtoList).when(mockBeerRepository).findAll(spec);
+
+        var minPrice = BigDecimal.valueOf(10);
+        var maxPrice = BigDecimal.valueOf(80);
+        var minAlcohol = BigDecimal.valueOf(5);
+        var maxAlcohol = BigDecimal.valueOf(5);
+        var actual = beerService.searchByCriteria(null, minAlcohol, maxAlcohol, minPrice, maxPrice, null);
+        assertThat(actual)
+                .isNotNull()
+                .isEqualTo(beerDtoList);
     }
 }

@@ -1,13 +1,15 @@
 package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.Assertions;
+import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.example.pivo.config.PostgresInitializer;
+import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.service.BeerService;
 import org.example.pivo.utils.data.BeerData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +42,8 @@ public class BeerControllerTests {
     private ObjectMapper jacksonObjectMapper;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private BeerMapper beerMapper;
 
     @BeforeEach
     public void setUp() {
@@ -102,6 +106,43 @@ public class BeerControllerTests {
                         .param("alcohol", "5"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().json(expectedListString));
+    }
+
+    @Test
+    void searchByNameTest() throws Exception {
+        var createBeerDtoLager = BeerData.createBeerDtoLager();
+        var createBeerDtoAle = BeerData.createBeerDtoAle();
+        var idLager = beerService.create(createBeerDtoLager).getId();
+        beerService.create(createBeerDtoAle);
+
+        var expectedList = List.of(BeerData.beerDtoLager(idLager));
+        var expectedListString = jacksonObjectMapper.writeValueAsString(expectedList);
+        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/searchByName")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("name", "игули"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        JsonAssertions.assertThatJson(result.getResponse().getContentAsString()).isEqualTo(expectedListString);
+    }
+
+    @Test
+    void searchByCriteriaTest() throws Exception {
+        var createBeerDtoLager = BeerData.createBeerDtoLager();
+        var createBeerDtoAle = BeerData.createBeerDtoAle();
+        var id = beerService.create(createBeerDtoLager).getId();
+        beerService.create(createBeerDtoAle);
+        var beerList = List.of(BeerData.beerDtoLager(id));
+        var beerListString = jacksonObjectMapper.writeValueAsString(beerList);
+        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/searchByCriteria")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("minPrice", "10")
+                        .param("maxPrice", "80")
+                        .param("minAlcohol", "5")
+                        .param("maxAlcohol", "5"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        JsonAssertions.assertThatJson(result.getResponse().getContentAsString()).isEqualTo(beerListString);
+
     }
 
 }
