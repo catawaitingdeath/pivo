@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.service.BeerService;
+import org.example.pivo.service.SearchService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,12 +21,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Контроллер поиска пив")
 public class SearchController {
-    private final BeerService beerService;
+    private final SearchService searchService;
 
     @Operation(summary = "Регистронезависимый поиск пива по части названия")
     @GetMapping("/by-name")
     public List<BeerDto> searchByName(@NotBlank @RequestParam @Parameter(description = "Полное или частичное название", example = "Troll") String name) {
-        return beerService.caseInsensitiveSearch(name);
+        return searchService.caseInsensitiveSearch(name);
     }
 
     @Operation(summary = "Поиск пива по заданным критериям (производитель, тип, цена, содержание алкоголя)")
@@ -36,6 +37,6 @@ public class SearchController {
                                           @RequestParam(required = false) BigDecimal minPrice,
                                           @RequestParam(required = false) BigDecimal maxPrice,
                                           @RequestParam(required = false) String type) {
-        return beerService.searchByCriteria(producer, minAlcohol, maxAlcohol, minPrice, maxPrice, type);
+        return searchService.searchByCriteria(producer, minAlcohol, maxAlcohol, minPrice, maxPrice, type);
     }
 }
