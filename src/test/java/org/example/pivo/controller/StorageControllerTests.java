@@ -60,9 +60,7 @@ public class StorageControllerTests {
 
     @Test
     void createTest() throws Exception {
-        var content = StorageData.createStorageDto1();
-        content.setBeer(beerId1);
-        content.setStore(storeId1);
+        var content = StorageData.createStorageDto1(beerId1, storeId1);
         var contentString = objectMapper.writeValueAsString(content);
         mockMvc.perform(MockMvcRequestBuilders.post("/storage")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,9 +90,7 @@ public class StorageControllerTests {
 
     @Test
     void getStorageTest() throws Exception {
-        var createStorageDto = StorageData.createStorageDto1();
-        createStorageDto.setBeer(beerId1);
-        createStorageDto.setStore(storeId1);
+        var createStorageDto = StorageData.createStorageDto1(beerId1, storeId1);
         var id = storageService.create(createStorageDto).getId();
         String jsonStorage = objectMapper.writeValueAsString(createStorageDto);
         mockMvc.perform(MockMvcRequestBuilders.get("/storage/{id}", id)

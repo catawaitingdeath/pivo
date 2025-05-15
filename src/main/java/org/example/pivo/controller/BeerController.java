@@ -39,8 +39,10 @@ public class BeerController {
 
     @Operation(summary = "Поиск всех сущностей пива в репозитории")
     @GetMapping
-    public Page<BeerDto> getAll() {
-        return beerService.getAll();
+    public Page<BeerDto> getAll(@RequestParam @Parameter(description = "Номер выводимой страницы", example = "5") Integer pageNumber,
+                                @RequestParam @Parameter(description = "Количество элементов на странице", example = "10") Integer pageSize) {
+
+        return beerService.getAll(pageNumber, pageSize);
     }
 
     @Operation(summary = "Поиск пива в репозитории по его id")
@@ -51,7 +53,8 @@ public class BeerController {
 
     @Operation(summary = "Поиск пива, у которого цена больше или равна переданной и алкоголь равен переданному")
     @GetMapping("/custom")
-    public List<BeerEntity> getBeer(@RequestParam @Parameter(description = "Миниальная цена искомого пива", example = "100.99") BigDecimal price, @RequestParam BigDecimal alcohol) {
+    public List<BeerEntity> getBeer(@RequestParam @Parameter(description = "Миниальная цена искомого пива", example = "100.99") BigDecimal price,
+                                    @RequestParam @Parameter(description = "Содержание алкоголя у искомого пива", example = "7.9") BigDecimal alcohol) {
         return beerService.custom(price, alcohol);
     }
 }

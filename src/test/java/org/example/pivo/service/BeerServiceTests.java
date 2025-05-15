@@ -15,6 +15,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -93,12 +95,14 @@ public class BeerServiceTests {
         beerEntityList.add(beerEntityLager);
         var typeEntityLager = TypeData.typeEntityLager(BigInteger.valueOf(2));
         var typeEntityAle = TypeData.typeEntityAle(BigInteger.valueOf(1));
+        var pageNumber = 1;
+        var pageSize = 10;
 
-        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
+        Mockito.doReturn(new PageImpl<>(beerEntityList)).when(mockBeerRepository).findAll(PageRequest.of(pageNumber, pageSize));
         Mockito.doReturn(Optional.of(typeEntityLager)).when(mockTypeRepository).findById(BigInteger.valueOf(2));
         Mockito.doReturn(Optional.of(typeEntityAle)).when(mockTypeRepository).findById(BigInteger.valueOf(1));
 
-        var actual = beerService.getAll();
+        var actual = beerService.getAll(pageNumber, pageSize);
         Assertions.assertThat(actual)
                 .isNotNull()
                 .containsExactlyInAnyOrderElementsOf(beerDtoList);
@@ -111,7 +115,7 @@ public class BeerServiceTests {
 
         Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
 
-        var actual = beerService.getAll();
+        var actual = beerService.getAll(5, 10);
         Assertions.assertThat(actual)
                 .isNotNull()
                 .isEmpty();

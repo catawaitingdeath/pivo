@@ -18,7 +18,7 @@ public interface BeerRepository extends CrudRepository<BeerEntity, String>, JpaS
 
     List<BeerEntity> findAllByPriceGreaterThanAndAlcoholOrderByPriceDesc(BigDecimal price, BigDecimal alcohol);
 
-    List<BeerEntity> findAllByProducer(String producer);
+    List<BeerEntity> findByNameIgnoreCase(String name);
 
     List<BeerEntity> findAll(Specification<BeerEntity> spec);
 

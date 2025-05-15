@@ -8,12 +8,14 @@ import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.service.BeerService;
 import org.example.pivo.utils.data.BeerData;
+import org.hibernate.query.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -71,11 +73,18 @@ public class BeerControllerTests {
         var beerEntity2 = BeerData.beerEntityAle();
         beerRepository.save(beerEntity1);
         beerRepository.save(beerEntity2);
-        mockMvc.perform(MockMvcRequestBuilders.get("/beer")
-                        .contentType(MediaType.APPLICATION_JSON))
+        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$[0].typeName").value("лагер"))
-                .andExpect(jsonPath("$[1].typeName").value("эль"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonAssertions.assertThatJson(result)
+                .inPath("$.content[0].name").isEqualTo("Жигули Барное светлое фильтрованное");
+        JsonAssertions.assertThatJson(result)
+                .inPath("$.content[1].name").isEqualTo("Troll Brew IPA светлое нефильтрованное");
     }
 
     @Test

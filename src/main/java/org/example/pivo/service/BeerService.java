@@ -18,6 +18,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,9 +41,9 @@ public class BeerService {
         return beerMapper.toDto(beerEntity, typeEntity);
     }
 
-    public Page<BeerDto> getAll() {
+    public Page<BeerDto> getAll(Integer pageNumber, Integer pageSize) {
         var result = new ArrayList<BeerDto>();
-        var beers = beerRepository.findAll(PageRequest.of(0, 100));
+        var beers = beerRepository.findAll(PageRequest.of(pageNumber, pageSize));
         var beerTypes = beers.stream()
                 .map(BeerEntity::getType)
                 .distinct()
@@ -67,14 +68,11 @@ public class BeerService {
     }
 
     public List<BeerDto> caseInsensitiveSearch(String name) {
-        List<BeerDto> result = new ArrayList<>();
-        var beers = getAll();
-        for (var beer : beers) {
-            if (StringUtils.containsIgnoreCase(beer.getName(), name)) {
-                result.add(beer);
-            }
-        }
-        return result;
+        //https://stackoverflow.com/questions/47752663/how-to-search-on-all-fields-with-partial-search-string-in-spring-data-elastic-se
+        List<BeerEntity> result = beerRepository.findByNameIgnoreCase(name);
+        return result.stream()
+                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType()).get()))
+                .toList();
     }
 
     public List<BeerDto> searchByCriteria(String producer, BigDecimal minAlcohol, BigDecimal maxAlcohol, BigDecimal minPrice, BigDecimal maxPrice,String type) {
