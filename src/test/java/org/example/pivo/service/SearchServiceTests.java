@@ -3,20 +3,21 @@ package org.example.pivo.service;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
-import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
 import org.example.pivo.utils.data.BeerData;
+import org.example.pivo.utils.data.TypeData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
-
+import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
 
@@ -35,62 +36,71 @@ public class SearchServiceTests {
         mockTypeRepository = mock(TypeRepository.class);
         mockBeerRepository = mock(BeerRepository.class);
         mockBeerSpecification = mock(BeerSpecification.class);
-        searchService = new SearchService(mockBeerRepository, mockTypeRepository, beerMapper);
+        mockBeerSpecification = mock(BeerSpecification.class);
+        searchService = new SearchService(mockBeerRepository, mockTypeRepository, beerMapper, mockBeerSpecification);
     }
 
     @Test
     @DisplayName("Return a full list")
     void searchByNameTest_Success() {
-        var beerEntityLager = BeerData.beerEntityLager(idLager);
-        var beerEntityAle = BeerData.beerEntityAle(idAle);
-        List<BeerEntity> beerEntityList = new ArrayList<>();
-        beerEntityList.add(beerEntityAle);
-        beerEntityList.add(beerEntityLager);
-
-        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
-
+        List<BeerEntity> beerEntityList = List.of(BeerData.beerEntityAle(idAle));
         var name = "OlL";
-        var actual = searchService.caseInsensitiveSearch(name);
-        Assertions.assertThat(actual)
-                .isNotNull()
-                .hasSize(1);
+        var type = TypeData.typeEntityAle(BigInteger.ONE);
+
+        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findByNameContainingIgnoreCase(name);
+        Mockito.doReturn(Optional.of(type)).when(mockTypeRepository).findById(BigInteger.ONE);
+
+        var actual = searchService.searchByName(name);
+        Assertions.assertThat(actual).isNotNull().hasSize(1);
     }
 
     @Test
     @DisplayName("Return an empty list")
     void searchByNameTest_Fail() {
-        var beerEntityLager = BeerData.beerEntityLager(idLager);
-        var beerEntityAle = BeerData.beerEntityAle(idAle);
-        List<BeerEntity> beerEntityList = new ArrayList<>();
-        beerEntityList.add(beerEntityAle);
-        beerEntityList.add(beerEntityLager);
-
-        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
-
+        List<BeerEntity> beerEntityList = List.of();
         var name = "Garage";
-        var actual = searchService.caseInsensitiveSearch(name);
-        Assertions.assertThat(actual)
-                .isEmpty();
+
+        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findByNameContainingIgnoreCase(name);
+
+        var actual = searchService.searchByName(name);
+        Assertions.assertThat(actual).isEmpty();
     }
 
     @Test
     @DisplayName("Return result")
     void searchByCriteriaTest_Success() {
-        var beerDtoLager = BeerData.beerDtoLager(idLager);
-        List<BeerDto> beerDtoList = new ArrayList<>();
-        beerDtoList.add(beerDtoLager);
-        //Specification<BeerEntity> spec = Specification.where(BeerSpecification.alcoholBetween(BigDecimal.valueOf(5), BigDecimal.valueOf(5))
-        //        .and(BeerSpecification.priceBetween(BigDecimal.valueOf(10), BigDecimal.valueOf(80))));
+        var beerEntityList = List.of(BeerData.beerEntityLager(idLager));
+        var type = TypeData.typeEntityLager(BigInteger.TWO);
+        var beerDtoList = List.of(BeerData.beerDtoLager(idLager));
 
-        //Mockito.doReturn(beerDtoList).when(mockBeerRepository).findAll(Mockito.any());
+        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll(Mockito.<Specification<BeerEntity>>any());
+        Mockito.doReturn(Optional.of(type)).when(mockTypeRepository).findById(BigInteger.TWO);
 
         var minPrice = BigDecimal.valueOf(10);
         var maxPrice = BigDecimal.valueOf(80);
-        var minAlcohol = BigDecimal.valueOf(5);
         var maxAlcohol = BigDecimal.valueOf(5);
-        var actual = searchService.searchByCriteria(null, minAlcohol, maxAlcohol, minPrice, maxPrice, null);
-        Assertions.assertThat(actual)
-                .isNotNull()
-                .isEqualTo(beerDtoList);
+        var actual = searchService.searchByCriteria(null, null, maxAlcohol, minPrice, maxPrice, null);
+        Assertions.assertThat(actual).isNotNull().isEqualTo(beerDtoList);
+        Mockito.verify(mockBeerSpecification, Mockito.times(1)).alcoholLessThan(Mockito.any());
+        Mockito.verify(mockBeerSpecification, Mockito.times(1)).priceGreaterThan(Mockito.any());
+        Mockito.verify(mockBeerSpecification, Mockito.times(1)).priceLessThan(Mockito.any());
+    }
+
+
+    @Test
+    @DisplayName("Return empty list")
+    void searchByCriteriaTest_NoCriteria() {
+        var emptyList = List.of();
+
+        Mockito.doReturn(emptyList).when(mockBeerRepository).findAll(Mockito.<Specification<BeerEntity>>any());
+
+        var actual = searchService.searchByCriteria(null, null, null, null, null, null);
+        Assertions.assertThat(actual).isNotNull().isEqualTo(emptyList);
+        Mockito.verify(mockBeerSpecification, Mockito.times(0)).alcoholLessThan(Mockito.any());
+        Mockito.verify(mockBeerSpecification, Mockito.times(0)).priceGreaterThan(Mockito.any());
+        Mockito.verify(mockBeerSpecification, Mockito.times(0)).priceLessThan(Mockito.any());
+        Mockito.verify(mockBeerSpecification, Mockito.times(0)).hasProducer(Mockito.any());
+        Mockito.verify(mockBeerSpecification, Mockito.times(0)).alcoholGreaterThan(Mockito.any());
+        Mockito.verify(mockBeerSpecification, Mockito.times(0)).hasType(Mockito.any());
     }
 }

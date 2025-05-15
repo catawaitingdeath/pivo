@@ -26,10 +26,10 @@ public class SearchController {
     @Operation(summary = "Регистронезависимый поиск пива по части названия")
     @GetMapping("/by-name")
     public List<BeerDto> searchByName(@NotBlank @RequestParam @Parameter(description = "Полное или частичное название", example = "Troll") String name) {
-        return searchService.caseInsensitiveSearch(name);
+        return searchService.searchByName(name);
     }
 
-    @Operation(summary = "Поиск пива по заданным критериям (производитель, тип, цена, содержание алкоголя)")
+    /*@Operation(summary = "Поиск пива по заданным критериям (производитель, тип, цена, содержание алкоголя)")
     @GetMapping("/by-criteria")
     public List<BeerDto> searchByCriteria(@RequestParam(required = false) String producer,
                                           @RequestParam(required = false) BigDecimal minAlcohol,
@@ -38,5 +38,5 @@ public class SearchController {
                                           @RequestParam(required = false) BigDecimal maxPrice,
                                           @RequestParam(required = false) String type) {
         return searchService.searchByCriteria(producer, minAlcohol, maxAlcohol, minPrice, maxPrice, type);
-    }
+    }*/
 }

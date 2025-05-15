@@ -1,7 +1,6 @@
 package org.example.pivo.service;
 
 import org.assertj.core.api.Assertions;
-import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
@@ -18,7 +17,6 @@ import org.mockito.Mockito;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,6 @@ public class BeerServiceTests {
     private BeerMapper beerMapper = Mappers.getMapper(BeerMapper.class);
     private TypeRepository mockTypeRepository;
     private BeerRepository mockBeerRepository;
-    private BeerSpecification mockBeerSpecification;
     private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
     private String idAle = "9kxe2OW_cPwW5exgivJ";
 
@@ -42,7 +39,6 @@ public class BeerServiceTests {
     void setup() {
         mockTypeRepository = mock(TypeRepository.class);
         mockBeerRepository = mock(BeerRepository.class);
-        mockBeerSpecification = mock(BeerSpecification.class);
         beerService = new BeerService(mockBeerRepository, mockTypeRepository, beerMapper);
     }
 
@@ -95,7 +91,7 @@ public class BeerServiceTests {
         beerEntityList.add(beerEntityLager);
         var typeEntityLager = TypeData.typeEntityLager(BigInteger.valueOf(2));
         var typeEntityAle = TypeData.typeEntityAle(BigInteger.valueOf(1));
-        var pageNumber = 1;
+        var pageNumber = 0;
         var pageSize = 10;
 
         Mockito.doReturn(new PageImpl<>(beerEntityList)).when(mockBeerRepository).findAll(PageRequest.of(pageNumber, pageSize));
@@ -115,7 +111,7 @@ public class BeerServiceTests {
 
         Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll();
 
-        var actual = beerService.getAll(5, 10);
+        var actual = beerService.getAll(0, 10);
         Assertions.assertThat(actual)
                 .isNotNull()
                 .isEmpty();

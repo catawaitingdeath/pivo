@@ -4,6 +4,7 @@ import org.example.pivo.model.entity.BeerEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -16,11 +17,11 @@ public interface BeerRepository extends CrudRepository<BeerEntity, String>, JpaS
 
     List<BeerEntity> findAll();
 
+    List<BeerEntity> findAll(Specification<BeerEntity> spec);
+
     List<BeerEntity> findAllByPriceGreaterThanAndAlcoholOrderByPriceDesc(BigDecimal price, BigDecimal alcohol);
 
-    List<BeerEntity> findByNameIgnoreCase(String name);
-
-    List<BeerEntity> findAll(Specification<BeerEntity> spec);
+    List<BeerEntity> findByNameContainingIgnoreCase(String name);
 
     Page<BeerEntity> findAll(Pageable pageable);
 }

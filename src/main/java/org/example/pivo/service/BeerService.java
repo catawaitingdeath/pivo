@@ -44,6 +44,9 @@ public class BeerService {
     public Page<BeerDto> getAll(Integer pageNumber, Integer pageSize) {
         var result = new ArrayList<BeerDto>();
         var beers = beerRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        if(beers == null){
+            return Page.empty();
+        }
         var beerTypes = beers.stream()
                 .map(BeerEntity::getType)
                 .distinct()

@@ -19,10 +19,10 @@ public class SearchService {
     private final BeerRepository beerRepository;
     private final TypeRepository typeRepository;
     private final BeerMapper beerMapper;
+    private final BeerSpecification beerSpecification;
 
-    public List<BeerDto> caseInsensitiveSearch(String name) {
-        //https://stackoverflow.com/questions/47752663/how-to-search-on-all-fields-with-partial-search-string-in-spring-data-elastic-se
-        List<BeerEntity> result = beerRepository.findByNameIgnoreCase(name);
+    public List<BeerDto> searchByName(String name) {
+        List<BeerEntity> result = beerRepository.findByNameContainingIgnoreCase(name);
         return result.stream()
                 .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType()).get()))
                 .toList();
@@ -32,22 +32,22 @@ public class SearchService {
         Specification<BeerEntity> spec = Specification.where(null);
 
         if (producer != null) {
-            spec = spec.and(BeerSpecification.hasProducer(producer));
+            spec = spec.and(beerSpecification.hasProducer(producer));
         }
         if (minAlcohol != null) {
-            spec = spec.and(BeerSpecification.alcoholGreaterThan(minAlcohol));
+            spec = spec.and(beerSpecification.alcoholGreaterThan(minAlcohol));
         }
         if (maxAlcohol != null) {
-            spec = spec.and(BeerSpecification.alcoholLessThan(maxAlcohol));
+            spec = spec.and(beerSpecification.alcoholLessThan(maxAlcohol));
         }
         if (minPrice != null) {
-            spec = spec.and(BeerSpecification.priceGreaterThan(minPrice));
+            spec = spec.and(beerSpecification.priceGreaterThan(minPrice));
         }
         if (maxPrice != null) {
-            spec = spec.and(BeerSpecification.priceLessThan(maxPrice));
+            spec = spec.and(beerSpecification.priceLessThan(maxPrice));
         }
         if (type != null) {
-            spec = spec.and(BeerSpecification.hasType(type));
+            spec = spec.and(beerSpecification.hasType(type));
         }
         List<BeerEntity> all = beerRepository.findAll(spec);
         return all.stream()
