@@ -39,8 +39,6 @@ public class StorageControllerTests {
     @Autowired
     private StorageRepository storageRepository;
     @Autowired
-    private StorageService storageService;
-    @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private StoreRepository storeRepository;
@@ -50,12 +48,17 @@ public class StorageControllerTests {
     private String beerId2 = "Ota-_XO_6Dc2nCKEU7LEmsi1K";
     private String storeId1 = "S7TKIwtHDfoLOESVj16e_v3ie";
     private String storeId2 = "inSV3fZx2Ai1bn0CjaDvFkIxw";
+    private String storageId1 = "phpIoHFCT8fc5GEZqCZQimYxD";
 
     @BeforeEach
     public void setUp() {
         storageRepository.deleteAll();
         storeRepository.deleteAll();
         beerRepository.deleteAll();
+        beerRepository.save(BeerData.beerEntityAle(beerId1));
+        beerRepository.save(BeerData.beerEntityLager(beerId2));
+        storeRepository.save(StoreData.storeEntity1(storeId1));
+        storeRepository.save(StoreData.storeEntity2(storeId2));
     }
 
     @Test
@@ -90,10 +93,9 @@ public class StorageControllerTests {
 
     @Test
     void getStorageTest() throws Exception {
-        var createStorageDto = StorageData.createStorageDto1(beerId1, storeId1);
-        var id = storageService.create(createStorageDto).getId();
-        String jsonStorage = objectMapper.writeValueAsString(createStorageDto);
-        mockMvc.perform(MockMvcRequestBuilders.get("/storage/{id}", id)
+        storageRepository.save(StorageData.storageEntity1(storageId1));
+        String jsonStorage = objectMapper.writeValueAsString(StorageData.storageDto1(storageId1));
+        mockMvc.perform(MockMvcRequestBuilders.get("/storage/{id}", storageId1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().json(jsonStorage));
