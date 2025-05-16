@@ -64,10 +64,12 @@ public class StoreControllerTests {
         storeRepository.save(storeEntity1);
         storeRepository.save(storeEntity2);
         mockMvc.perform(MockMvcRequestBuilders.get("/store")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$[0].address").value("Ленинградское ш., 58с53, Москва"))
-                .andExpect(jsonPath("$[1].address").value("Просторная ул., 6, Москва"));
+                .andExpect(jsonPath("$.content[0].address").value("Ленинградское ш., 58с53, Москва"))
+                .andExpect(jsonPath("$.content[1].address").value("Просторная ул., 6, Москва"));
     }
 
     @Test

@@ -6,6 +6,9 @@ import org.example.pivo.model.dto.CreateStorageDto;
 import org.example.pivo.model.dto.StorageDto;
 import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.StorageRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,17 +21,20 @@ public class StorageService {
     private final StorageMapper storageMapper;
 
 
-    public StorageDto create(CreateStorageDto store) {
-        var storageEntity = storageMapper.toEntity(store);
+    public StorageDto create(CreateStorageDto storage) {
+        var storageEntity = storageMapper.toEntity(storage);
         storageEntity = storageRepository.save(storageEntity);
         return storageMapper.toDto(storageEntity);
     }
 
-    public List<StorageDto> getAll() {
+    public Page<StorageDto> getAll(Integer pageNumber, Integer pageSize) {
         var result = new ArrayList<StorageDto>();
-        var storages = storageRepository.findAll();
+        var storages = storageRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        if(storages == null){
+            return Page.empty();
+        }
         storages.forEach(t -> result.add(storageMapper.toDto(t)));
-        return result;
+        return new PageImpl<>(result, storages.getPageable(), storages.getTotalElements());
     }
 
     public StorageDto get(String id) {

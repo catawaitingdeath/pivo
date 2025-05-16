@@ -85,10 +85,12 @@ public class StorageControllerTests {
         storageRepository.save(storageEntity1);
         storageRepository.save(storageEntity2);
         mockMvc.perform(MockMvcRequestBuilders.get("/storage")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$[0].count").value("100"))
-                .andExpect(jsonPath("$[1].count").value("10"));
+                .andExpect(jsonPath("$.content[0].count").value("100"))
+                .andExpect(jsonPath("$.content[1].count").value("10"));
     }
 
     @Test

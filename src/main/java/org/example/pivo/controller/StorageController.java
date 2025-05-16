@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.pivo.model.dto.CreateStorageDto;
 import org.example.pivo.model.dto.StorageDto;
 import org.example.pivo.service.StorageService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +29,10 @@ public class StorageController {
 
     @Operation(summary = "Поиск всех складов в репозитории")
     @GetMapping
-    public List<StorageDto> getAll() {
-        return storageService.getAll();
+    public Page<StorageDto> getAll(@RequestParam @Parameter(description = "Номер выводимой страницы", example = "5") Integer pageNumber,
+                                   @RequestParam @Parameter(description = "Количество элементов на странице", example = "10") Integer pageSize) {
+
+        return storageService.getAll(pageNumber, pageSize);
     }
 
     @Operation(summary = "Поиск склада в репозитории по его id")

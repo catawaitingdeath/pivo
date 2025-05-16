@@ -3,6 +3,7 @@ package org.example.pivo.service;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.StoreDto;
+import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StoreEntity;
 import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.StoreRepository;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,9 +67,11 @@ public class StoreServiceTests {
         List<StoreEntity> storeEntityList = new ArrayList<>();
         storeEntityList.add(storeEntity2);
         storeEntityList.add(storeEntity1);
+        var pageNumber = 0;
+        var pageSize = 10;
 
-        Mockito.doReturn(storeEntityList).when(mockStoreRepository).findAll();
-        var actual = storeService.getAll();
+        Mockito.doReturn(new PageImpl<>(storeEntityList)).when(mockStoreRepository).findAll(PageRequest.of(pageNumber, pageSize));
+        var actual = storeService.getAll(pageNumber, pageSize);
         Assertions.assertThat(actual)
                 .isNotNull()
                 .containsExactlyInAnyOrderElementsOf(storeDtoList);
@@ -75,11 +80,11 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Return an empty list")
     void getAll_EmptyStoreRepository() {
-        List<StoreEntity> storeEntityList = List.of();
+        List<BeerEntity> storeEntityList = List.of();
 
         Mockito.doReturn(storeEntityList).when(mockStoreRepository).findAll();
 
-        var actual = storeService.getAll();
+        var actual = storeService.getAll(0, 10);
         Assertions.assertThat(actual)
                 .isNotNull()
                 .isEmpty();

@@ -3,6 +3,7 @@ package org.example.pivo.service;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.mapper.StorageMapper;
 import org.example.pivo.model.dto.StorageDto;
+import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.StorageRepository;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,9 +67,11 @@ public class StorageServiceTests {
         var storageEntityList = new ArrayList<StorageEntity>();
         storageEntityList.add(storageEntity2);
         storageEntityList.add(storageEntity1);
+        var pageNumber = 0;
+        var pageSize = 10;
 
-        Mockito.doReturn(storageEntityList).when(mockStorageRepository).findAll();
-        var actual = storageService.getAll();
+        Mockito.doReturn(new PageImpl<>(storageEntityList)).when(mockStorageRepository).findAll(PageRequest.of(pageNumber, pageSize));
+        var actual = storageService.getAll(pageNumber, pageSize);
         Assertions.assertThat(actual)
                 .isNotNull()
                 .containsExactlyInAnyOrderElementsOf(storageDtoList);
@@ -75,9 +80,11 @@ public class StorageServiceTests {
     @Test
     @DisplayName("Return an empty list")
     void getAll_EmptyStorageRepository() {
-        Mockito.doReturn(List.of()).when(mockStorageRepository).findAll();
+        List<BeerEntity> storageEntityList = List.of();
 
-        var actual = storageService.getAll();
+        Mockito.doReturn(storageEntityList).when(mockStorageRepository).findAll();
+
+        var actual = storageService.getAll(0, 10);
         Assertions.assertThat(actual)
                 .isNotNull()
                 .isEmpty();

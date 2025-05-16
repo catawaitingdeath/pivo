@@ -9,12 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.service.StoreService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,7 +29,11 @@ public class StoreController {
 
     @Operation(summary = "Поиск всех магазинов в репозитории")
     @GetMapping
-    public List<StoreDto> getAll() {return storeService.getAll();}
+    public Page<StoreDto> getAll(@RequestParam @Parameter(description = "Номер выводимой страницы", example = "5") Integer pageNumber,
+                                 @RequestParam @Parameter(description = "Количество элементов на странице", example = "10") Integer pageSize) {
+
+        return storeService.getAll(pageNumber, pageSize);
+    }
 
     @Operation(summary = "Поиск магазина в репозитории по его id")
     @GetMapping("/{id}")

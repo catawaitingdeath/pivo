@@ -6,6 +6,9 @@ import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.StoreRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,11 +27,14 @@ public class StoreService {
         return storeMapper.toDto(storeEntity);
     }
 
-    public List<StoreDto> getAll() {
+    public Page<StoreDto> getAll(Integer pageNumber, Integer pageSize) {
         var result = new ArrayList<StoreDto>();
-        var stores = storeRepository.findAll();
+        var stores = storeRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        if(stores == null){
+            return Page.empty();
+        }
         stores.forEach(t -> result.add(storeMapper.toDto(t)));
-        return result;
+        return new PageImpl<>(result, stores.getPageable(), stores.getTotalElements());
     }
 
     public StoreDto get(String id) {

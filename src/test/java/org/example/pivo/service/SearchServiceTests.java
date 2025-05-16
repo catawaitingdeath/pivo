@@ -130,7 +130,7 @@ public class SearchServiceTests {
         var storeDto = StoreData.storeDto1(storeId1);
 
         Mockito.doReturn(beerEntity).when(mockBeerRepository).findByName(beerEntity.getName());
-        Mockito.doReturn(List.of(storageEntity)).when(mockStorageRepository).findAll(Mockito.any());
+        Mockito.doReturn(List.of(storageEntity)).when(mockStorageRepository).findAll(Mockito.<Specification<StorageEntity>>any());
         Mockito.doReturn(Optional.of(storeEntity)).when(mockStoreRepository).findById(storeId1);
 
         var actual = searchService.searchInStock(beerEntity.getName());
@@ -146,7 +146,7 @@ public class SearchServiceTests {
         var emptyList = List.of();
 
         Mockito.doReturn(beerEntity).when(mockBeerRepository).findByName(beerEntity.getName());
-        Mockito.doReturn(emptyList).when(mockStorageRepository).findAll(Mockito.any());
+        Mockito.doReturn(emptyList).when(mockStorageRepository).findAll(Mockito.<Specification<StorageEntity>>any());
 
         var actual = searchService.searchInStock(beerEntity.getName());
         Assertions.assertThat(actual).isNotNull().isEqualTo(emptyList);
