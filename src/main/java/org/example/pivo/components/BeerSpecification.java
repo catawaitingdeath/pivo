@@ -2,6 +2,7 @@ package org.example.pivo.components;
 
 
 import org.example.pivo.model.entity.BeerEntity;
+import org.example.pivo.model.entity.StorageEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -38,5 +39,15 @@ public class BeerSpecification {
     public Specification<BeerEntity> priceGreaterThan(BigDecimal minPrice) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice);
+    }
+
+    public Specification<StorageEntity> correctBeer(String beerId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("beer"), beerId);
+    }
+
+    public Specification<StorageEntity> hasBeer() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.greaterThanOrEqualTo(root.get("count"), 1);
     }
 }

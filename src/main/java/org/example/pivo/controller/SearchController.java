@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.service.BeerService;
 import org.example.pivo.service.SearchService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,5 +39,11 @@ public class SearchController {
                                           @RequestParam(required = false) BigDecimal maxPrice,
                                           @RequestParam(required = false) String type) {
         return searchService.searchByCriteria(producer, minAlcohol, maxAlcohol, minPrice, maxPrice, type);
+    }
+
+    @Operation(summary = "Поиск магазинов, где в продаже есть конкретное пиво")
+    @GetMapping("/in-stock")
+    public List<StoreDto> searchInStock(@NotBlank @RequestParam(required = false) @Parameter(description = "Полное название", example = "Troll Brew IPA светлое нефильтрованное") String beerName) {
+        return searchService.searchInStock(beerName);
     }
 }

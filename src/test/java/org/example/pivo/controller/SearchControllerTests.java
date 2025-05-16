@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.repository.BeerRepository;
+import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.BeerData;
+import org.example.pivo.utils.data.StoreData;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,6 +33,14 @@ public class SearchControllerTests {
     @Autowired
     private ObjectMapper jacksonObjectMapper;
     private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
+    @Autowired
+    private StoreRepository storeRepository;
+
+    @BeforeEach
+    public void setUp() {
+        storeRepository.deleteAll();
+        beerRepository.deleteAll();
+    }
 
     @Test
     void searchByNameTest() throws Exception {
@@ -41,8 +52,10 @@ public class SearchControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("name", "игули"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-        JsonAssertions.assertThatJson(result.getResponse().getContentAsString()).isEqualTo(expectedListString);
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonAssertions.assertThatJson(result.equals(expectedListString));
     }
 
     @Test
@@ -63,6 +76,24 @@ public class SearchControllerTests {
                 .getResponse()
                 .getContentAsString();
         JsonAssertions.assertThatJson(result.equals(beerListString));
+    }
 
+    @Test
+    void searchInStockTest() throws Exception {
+        var beerEntityLager = BeerData.beerEntityLager();
+        var beerEntityAle = BeerData.beerEntityAle();
+        beerRepository.save(beerEntityLager);
+        beerRepository.save(beerEntityAle);
+        storeRepository.save(StoreData.storeEntity1());
+        var storeList = List.of(StoreData.storeDto1(idLager));
+        var storeListString = jacksonObjectMapper.writeValueAsString(storeList);
+        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/in-stock")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("beerName", beerEntityLager.getName()))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonAssertions.assertThatJson(result.equals(storeListString));
     }
 }

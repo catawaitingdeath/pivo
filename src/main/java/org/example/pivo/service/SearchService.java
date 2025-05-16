@@ -3,9 +3,16 @@ package org.example.pivo.service;
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
+import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
+import org.example.pivo.model.entity.StorageEntity;
+import org.example.pivo.model.entity.StoreEntity;
+import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.BeerRepository;
+import org.example.pivo.repository.StorageRepository;
+import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.repository.TypeRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,13 +25,17 @@ import java.util.List;
 public class SearchService {
     private final BeerRepository beerRepository;
     private final TypeRepository typeRepository;
+    private final StorageRepository storageRepository;
+    private final StoreRepository storeRepository;
     private final BeerMapper beerMapper;
+    private final StoreMapper storeMapper;
     private final BeerSpecification beerSpecification;
 
     public List<BeerDto> searchByName(String name) {
         List<BeerEntity> result = beerRepository.findByNameContainingIgnoreCase(name);
         return result.stream()
-                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType()).get()))
+                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType())
+                        .orElseThrow(() -> new NotFoundException("Тип не найден"))))
                 .toList();
     }
 
@@ -51,7 +62,27 @@ public class SearchService {
         }
         List<BeerEntity> all = beerRepository.findAll(spec);
         return all.stream()
-                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType()).get()))
+                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType())
+                        .orElseThrow(() -> new NotFoundException("Тип не найден"))))
+                .toList();
+    }
+
+    public List<StoreDto> searchInStock(String beerName) {
+        var beerId = beerRepository.findByName(beerName).getId();
+        Specification<StorageEntity> spec = Specification.where(null);
+        spec = spec.and(beerSpecification.correctBeer(beerId));
+        spec = spec.and(beerSpecification.hasBeer());
+        //var spec = beerSpecification.correctBeer(beerId).and(beerSpecification.hasBeer());
+        var allStorages = storageRepository.findAll(spec);
+        if (allStorages.isEmpty()) {
+            return List.of();
+        }
+        List<StoreEntity> all = allStorages.stream()
+                .map(b -> storeRepository.findById(b.getStore())
+                        .orElseThrow(()-> new NotFoundException("Магазин не найден")))
+                .toList();
+        return all.stream()
+                .map(storeMapper::toDto)
                 .toList();
     }
 }
