@@ -49,11 +49,4 @@ public class StorageData {
     public static CreateStorageDto createStorageDto1() {
         return FileReaderUtility.readFile("/controllerFiles/createStorage/createStorageDto1.json", CreateStorageDto.class);
     }
-
-    public static CreateStorageDto CreateStorageDto2(String beerId, String storeId) {
-        var createDto = FileReaderUtility.readFile("/controllerFiles/createStorage/createStorageDto2.json", CreateStorageDto.class);
-        createDto.setBeer(beerId);
-        createDto.setStore(storeId);
-        return createDto;
-    }
 }

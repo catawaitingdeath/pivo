@@ -62,9 +62,9 @@ public class BeerService {
     public BeerDto get(String id) {
         var beerEntity = beerRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Предоставлен неверный id"));
-        return beerMapper.toDto(
-                beerEntity, typeRepository.findById(beerEntity.getType())
-                        .orElseThrow(() -> new NotFoundException("Тип не найден")));
+        var type = typeRepository.findById(beerEntity.getType())
+                .orElseThrow(() -> new NotFoundException("Тип не найден"));
+        return beerMapper.toDto(beerEntity, type);
     }
 
     public List<BeerEntity> custom(BigDecimal price, BigDecimal alcohol) {

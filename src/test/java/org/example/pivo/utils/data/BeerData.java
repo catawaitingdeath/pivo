@@ -33,6 +33,14 @@ public class BeerData {
         return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityLager.json", BeerEntity.class);
     }
 
+    public static BeerEntity beerEntityPorter() {
+        return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityPorter.json", BeerEntity.class);
+    }
+
+    public static BeerEntity beerEntityStout() {
+        return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityStout.json", BeerEntity.class);
+    }
+
     public static BeerDto beerDtoAle(String id) {
         var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoAle.json", BeerDto.class);
         dto.setId(id);
@@ -41,6 +49,18 @@ public class BeerData {
 
     public static BeerDto beerDtoLager(String id) {
         var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoLager.json", BeerDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
+    public static BeerDto beerDtoStout(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoStout.json", BeerDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
+    public static BeerDto beerDtoPorter(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoPorter.json", BeerDto.class);
         dto.setId(id);
         return dto;
     }

@@ -1,10 +1,14 @@
 package org.example.pivo.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.mapper.StorageMapper;
+import org.example.pivo.model.dto.BeerShipmentDto;
 import org.example.pivo.model.dto.CreateStorageDto;
 import org.example.pivo.model.dto.StorageDto;
+import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.model.exceptions.NotFoundException;
+import org.example.pivo.model.exceptions.BadRequestException;
 import org.example.pivo.repository.StorageRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -41,5 +45,28 @@ public class StorageService {
         return storageRepository.findById(id)
                 .map(storageMapper::toDto)
                 .orElseThrow(()-> new NotFoundException("Предоставлен неверный id"));
+    }
+
+    public void ship(@Valid BeerShipmentDto beerShipmentDto) {
+        for(var storeShipment : beerShipmentDto.getStoreShipments()) {
+            var uniqueBeerIdCount = storeShipment.getPosition().stream()
+                    .map(BeerShipmentDto.Position::getBeerId)
+                    .distinct()
+                    .count();
+            if(storeShipment.getPosition().size() != uniqueBeerIdCount) {
+                throw new BadRequestException("Позиции пива не уникальны");
+            }
+            for(var position : storeShipment.getPosition()){
+                var beerId = position.getBeerId();
+                var count = position.getCount();
+                var storageEntity = StorageEntity.builder()
+                        .store(storeShipment.getStoreId())
+                        .beer(beerId)
+                        .count(count)
+                        .build();
+                storageRepository.save(storageEntity);
+            }
+        }
+
     }
 }

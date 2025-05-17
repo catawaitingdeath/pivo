@@ -8,6 +8,7 @@ import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.utils.data.StorageData;
+import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

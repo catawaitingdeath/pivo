@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.example.pivo.model.dto.BeerShipmentDto;
 import org.example.pivo.model.dto.CreateStorageDto;
 import org.example.pivo.model.dto.StorageDto;
 import org.example.pivo.service.StorageService;
@@ -39,5 +40,11 @@ public class StorageController {
     @GetMapping("/{id}")
     public StorageDto getStore(@NotBlank @PathVariable @Parameter(description = "Id искомого склада", example = "W_cPwW5eqk9kxe2OxgivJzVgu") String id) {
         return storageService.get(id);
+    }
+
+    @Operation(summary = "Поставка пивандеполы")
+    @PostMapping("/shipment")
+    public void ship(@Valid @RequestBody BeerShipmentDto beerShipmentDto) {
+        storageService.ship(beerShipmentDto);
     }
 }

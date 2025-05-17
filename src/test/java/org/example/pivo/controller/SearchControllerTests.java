@@ -32,7 +32,7 @@ public class SearchControllerTests {
     private BeerRepository beerRepository;
     @Autowired
     private ObjectMapper jacksonObjectMapper;
-    private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
+    private String genericId = "W_cPwW5eqk9kxe2OxgivJzVgu";
     @Autowired
     private StoreRepository storeRepository;
 
@@ -62,15 +62,20 @@ public class SearchControllerTests {
     void searchByCriteriaTest() throws Exception {
         var beerEntityLager = BeerData.beerEntityLager();
         var beerEntityAle = BeerData.beerEntityAle();
+        var beerEntityStout = BeerData.beerEntityStout();
+        var beerEntityPorter = BeerData.beerEntityPorter();
         beerRepository.save(beerEntityLager);
-        beerRepository.save(beerEntityAle);
-        var beerList = List.of(BeerData.beerDtoLager(idLager));
+        var id = beerRepository.save(beerEntityAle).getId();
+        beerRepository.save(beerEntityStout);
+        beerRepository.save(beerEntityPorter);
+        var beerList = List.of(BeerData.beerDtoAle(id));
         var beerListString = jacksonObjectMapper.writeValueAsString(beerList);
+
         var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/by-criteria")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("minPrice", "10")
+                        .param("minPrice", "65")
                         .param("maxPrice", "80")
-                        .param("minAlcohol", "5"))
+                        .param("minAlcohol", "6"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn()
                 .getResponse()
@@ -85,7 +90,7 @@ public class SearchControllerTests {
         beerRepository.save(beerEntityLager);
         beerRepository.save(beerEntityAle);
         storeRepository.save(StoreData.storeEntity1());
-        var storeList = List.of(StoreData.storeDto1(idLager));
+        var storeList = List.of(StoreData.storeDto1(genericId));
         var storeListString = jacksonObjectMapper.writeValueAsString(storeList);
         var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/in-stock")
                         .contentType(MediaType.APPLICATION_JSON)
