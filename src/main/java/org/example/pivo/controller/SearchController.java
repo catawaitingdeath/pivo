@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
+import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.service.BeerService;
 import org.example.pivo.service.SearchService;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,12 @@ public class SearchController {
     @GetMapping("/in-stock")
     public List<StoreDto> searchInStock(@NotBlank @RequestParam(required = false) @Parameter(description = "Полное название", example = "Troll Brew IPA светлое нефильтрованное") String beerName) {
         return searchService.searchInStock(beerName);
+    }
+
+    @Operation(summary = "Поиск магазинов, где в продаже есть все позиции из списка пива")
+    @GetMapping("/stores")
+    public List<StoreDto> searchForStores(@NotBlank @RequestParam(required = false) @Parameter(description = "список сущностей искомых пив", example = "") List<BeerEntity> beers) {
+        return searchService.searchForStores(beers);
     }
 
     @Operation(summary = "Поиск пива, которое есть в продаже в конкретном магазине")

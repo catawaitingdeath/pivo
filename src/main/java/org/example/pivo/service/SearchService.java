@@ -23,9 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -96,23 +94,15 @@ public class SearchService {
     }
 
     public List<StoreDto> searchForStores(List<BeerEntity> beers) {
-        Specification<StorageEntity> spec = Specification.where(null);
+        Set<StoreDto> stores = new HashSet<>(searchInStock(beers.getFirst().getName()));
         for (BeerEntity beer : beers) {
-            var beerId = beerRepository.findByName(beer.getName()).getId();
-            spec = spec.and(beerSpecification.correctBeer(beerId));
-            spec = spec.and(beerSpecification.hasBeer());
+            var storesList = searchInStock(beer.getName());
+            stores.retainAll(storesList);
+            if (stores.isEmpty()) {
+                return List.of();
+            }
         }
-        var allStorages = storageRepository.findAll(spec);
-        if (allStorages.isEmpty()) {
-            return List.of();
-        }
-        List<StoreEntity> all = allStorages.stream()
-                .map(b -> storeRepository.findById(b.getStore())
-                        .orElseThrow(()-> new NotFoundException("Магазин не найден")))
-                .toList();
-        return all.stream()
-                .map(storeMapper::toDto)
-                .toList();
+        return new ArrayList<>(stores);
     }
 
     public Page<BeerDto> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
@@ -120,20 +110,26 @@ public class SearchService {
         if(storages == null) {
             return Page.empty();
         }
-        var beers = storages.stream()
+        var result = new ArrayList<BeerDto>();
+        var beerIds = storages.stream()
                 .map(StorageEntity::getBeer)
+                .toList();
+        var beers = beerIds.stream()
                 .map(beerRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
-        var beerTypes = beers.stream()
+        var typeIds = beers.stream()
                 .map(BeerEntity::getType)
-                .distinct()
+                .toList();
+        var types = typeIds.stream()
                 .map(typeRepository::findById)
+                .toList();
+        var beerTypes = types.stream()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toMap(TypeEntity::getId, Function.identity()));
-        var result = new ArrayList<BeerDto>();
+                .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
+
         beers.forEach(t -> result.add(beerMapper.toDto(t, beerTypes.get(t.getType()))));
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return new PageImpl<>(result, pageable, beers.size());

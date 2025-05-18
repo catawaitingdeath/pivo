@@ -18,9 +18,11 @@ import org.example.pivo.utils.data.TypeData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.Builder;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
 import org.springframework.data.jpa.domain.Specification;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -42,8 +44,12 @@ public class SearchServiceTests {
     private String idAle = "9kxe2OW_cPwW5exgivJ";
     private String beerId1 = "2IVPACIrIT-Tr2Gw-JoApXZKT";
     private String beerId2 = "Ota-_XO_6Dc2nCKEU7LEmsi1K";
+    private String beerId3 = "RIFXvJ-4y2kmWY84Pqyku";
+    private String beerId4 = "i0k-Ch3R0B5NNZh1x6IL2";
     private String storeId1 = "S7TKIwtHDfoLOESVj16e_v3ie";
     private String storeId2 = "inSV3fZx2Ai1bn0CjaDvFkIxw";
+    private String storeId3 = "XFPSsDSfIlQ77CKTRkkBq";
+    private String storeId4 = "W_cPwW5eqk9kxe2OxgivJzVgu";
     private String storageId1 = "phpIoHFCT8fc5GEZqCZQimYxD";
 
 
@@ -157,22 +163,38 @@ public class SearchServiceTests {
     @Test
     @DisplayName("Return result")
     void searchForStoresTest_Success() {
-        var storageEntity = StorageData.storageEntity1();
-        storageEntity.setBeer(beerId1);
-        storageEntity.setStore(storeId1);
         var beerEntityLager = BeerData.beerEntityLager(beerId1);
         var beerEntityAle = BeerData.beerEntityAle(beerId2);
-        var storeEntity = StoreData.storeEntity1(storeId1);
-        var storeDto = StoreData.storeDto1(storeId1);
+        var beerEntityPorter = BeerData.beerEntityPorter(beerId3);
+        var beerEntityStout = BeerData.beerEntityStout(beerId4);
+        var storeDto1 = StoreData.storeDto1(storeId1);
+        var storeDto2 = StoreData.storeDto2(storeId2);
+        var storeDto3 = StoreData.storeDto3(storeId3);
+        var storeDto4 = StoreData.storeDto4(storeId4);
+
+        var storageEntity1 = buildStorageEntity(beerId1,storeId1);
+        var storageEntity3 = buildStorageEntity(beerId3,storeId1);
+
+        var storageEntity4 = buildStorageEntity(beerId3,storeId2);
+        var storageEntity5 = buildStorageEntity(beerId2,storeId2);
+
+        var storageEntity6 = buildStorageEntity(beerId1,storeId3);
+        var storageEntity7 = buildStorageEntity(beerId2,storeId3);
+        var storageEntity8 = buildStorageEntity(beerId3,storeId3);
+        var storageEntity9 = buildStorageEntity(beerId4,storeId3);
+
+        var storageEntity10 = buildStorageEntity(beerId4,storeId4);
+
 
         Mockito.doReturn(beerEntityLager).when(mockBeerRepository).findByName(beerEntityLager.getName());
-        Mockito.doReturn(List.of(storageEntity)).when(mockStorageRepository).findAll(Mockito.<Specification<StorageEntity>>any());
-        Mockito.doReturn(Optional.of(storeEntity)).when(mockStoreRepository).findById(storeId1);
+        Mockito.doReturn(beerEntityAle).when(mockBeerRepository).findByName(beerEntityAle.getName());
+        Mockito.doReturn(beerEntityPorter).when(mockBeerRepository).findByName(beerEntityPorter.getName());
+        Mockito.doReturn(beerEntityStout).when(mockBeerRepository).findByName(beerEntityStout.getName());
 
-        var actual = searchService.searchForStores(List.of(beerEntityAle, beerEntityLager));
+        var actual = searchService.searchForStores(List.of(beerEntityAle, beerEntityPorter));
         Assertions.assertThat(actual)
                 .isNotNull()
-                .isEqualTo(List.of(storeDto));
+                .isEqualTo(List.of(storeDto2, storeDto3));
     }
 
     @Test
@@ -207,5 +229,13 @@ public class SearchServiceTests {
         Assertions.assertThat(actual)
                 .isNotNull()
                 .containsExactlyInAnyOrderElementsOf(List.of(beerDtoLager, beerDtoAle));
+    }
+
+    StorageEntity buildStorageEntity(String beerId, String storeId) {
+        return StorageEntity.builder()
+                .beer(beerId)
+                .store(storeId)
+                .count(BigInteger.valueOf(10))
+                .build();
     }
 }

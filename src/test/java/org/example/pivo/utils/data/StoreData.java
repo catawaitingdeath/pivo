@@ -39,6 +39,18 @@ public class StoreData {
         return dto;
     }
 
+    public static StoreDto storeDto3(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDto3.json", StoreDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
+    public static StoreDto storeDto4(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDto4.json", StoreDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
     public static CreateStoreDto createStoreDto1() {
         return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDto1.json", CreateStoreDto.class);
     }

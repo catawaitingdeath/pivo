@@ -25,6 +25,18 @@ public class BeerData {
         return entity;
     }
 
+    public static BeerEntity beerEntityPorter(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityPorter.json", BeerEntity.class);
+        entity.setId(id);
+        return entity;
+    }
+
+    public static BeerEntity beerEntityStout(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityStout.json", BeerEntity.class);
+        entity.setId(id);
+        return entity;
+    }
+
     public static BeerEntity beerEntityAle() {
         return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityAle.json", BeerEntity.class);
     }

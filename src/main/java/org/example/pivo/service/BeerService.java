@@ -47,13 +47,16 @@ public class BeerService {
         if(beers == null){
             return Page.empty();
         }
-        var beerTypes = beers.stream()
+        var typeIds = beers.stream()
                 .map(BeerEntity::getType)
-                .distinct()
+                .toList();
+        var types = typeIds.stream()
                 .map(typeRepository::findById)
+                .toList();
+        var beerTypes = types.stream()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toMap(TypeEntity::getId, Function.identity()));
+                .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
 
         beers.forEach(t -> result.add(beerMapper.toDto(t, beerTypes.get(t.getType()))));
         return new PageImpl<>(result, beers.getPageable(), beers.getTotalElements());
