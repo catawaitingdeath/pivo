@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.mapper.StoreMapper;
+import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.repository.BeerRepository;
@@ -22,6 +23,7 @@ import org.mockito.Mockito;
 import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -150,5 +152,60 @@ public class SearchServiceTests {
 
         var actual = searchService.searchInStock(beerEntity.getName());
         Assertions.assertThat(actual).isNotNull().isEqualTo(emptyList);
+    }
+
+    @Test
+    @DisplayName("Return result")
+    void searchForStoresTest_Success() {
+        var storageEntity = StorageData.storageEntity1();
+        storageEntity.setBeer(beerId1);
+        storageEntity.setStore(storeId1);
+        var beerEntityLager = BeerData.beerEntityLager(beerId1);
+        var beerEntityAle = BeerData.beerEntityAle(beerId2);
+        var storeEntity = StoreData.storeEntity1(storeId1);
+        var storeDto = StoreData.storeDto1(storeId1);
+
+        Mockito.doReturn(beerEntityLager).when(mockBeerRepository).findByName(beerEntityLager.getName());
+        Mockito.doReturn(List.of(storageEntity)).when(mockStorageRepository).findAll(Mockito.<Specification<StorageEntity>>any());
+        Mockito.doReturn(Optional.of(storeEntity)).when(mockStoreRepository).findById(storeId1);
+
+        var actual = searchService.searchForStores(List.of(beerEntityAle, beerEntityLager));
+        Assertions.assertThat(actual)
+                .isNotNull()
+                .isEqualTo(List.of(storeDto));
+    }
+
+    @Test
+    @DisplayName("Return result")
+    void searchForBeerTest_Success() {
+        var beerEntity1 = BeerData.beerEntityLager(beerId1);
+        var beerEntity2 = BeerData.beerEntityAle(beerId2);
+        var storeEntity = StoreData.storeEntity1(storeId1);
+        var storageEntity1 = StorageEntity.builder()
+                .beer(beerEntity1.getId())
+                .store(storeEntity.getId())
+                .build();
+        var storageEntity2 = StorageEntity.builder()
+                .beer(beerEntity2.getId())
+                .store(storeEntity.getId())
+                .build();
+        storageEntity2.setId(storageEntity1.getId());
+        var beerDtoLager = BeerData.beerDtoLager(beerId1);
+        var beerDtoAle = BeerData.beerDtoAle(beerId2);
+        var typeEntityLager = TypeData.typeEntityLager(BigInteger.valueOf(2));
+        var typeEntityAle = TypeData.typeEntityAle(BigInteger.valueOf(1));
+        var pageNumber = 0;
+        var pageSize = 10;
+
+        Mockito.doReturn(Optional.of(typeEntityLager)).when(mockTypeRepository).findById(BigInteger.valueOf(2));
+        Mockito.doReturn(Optional.of(typeEntityAle)).when(mockTypeRepository).findById(BigInteger.valueOf(1));
+        Mockito.doReturn(Optional.of(beerEntity1)).when(mockBeerRepository).findById(beerEntity1.getId());
+        Mockito.doReturn(Optional.of(beerEntity2)).when(mockBeerRepository).findById(beerEntity2.getId());
+        Mockito.doReturn(List.of(storageEntity1, storageEntity2)).when(mockStorageRepository).findAll(Mockito.<Specification<StorageEntity>>any());
+
+        var actual = searchService.searchForBeer(storeId1, pageNumber, pageSize);
+        Assertions.assertThat(actual)
+                .isNotNull()
+                .containsExactlyInAnyOrderElementsOf(List.of(beerDtoLager, beerDtoAle));
     }
 }

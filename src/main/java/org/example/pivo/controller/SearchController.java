@@ -9,6 +9,7 @@ import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.service.BeerService;
 import org.example.pivo.service.SearchService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,5 +46,13 @@ public class SearchController {
     @GetMapping("/in-stock")
     public List<StoreDto> searchInStock(@NotBlank @RequestParam(required = false) @Parameter(description = "Полное название", example = "Troll Brew IPA светлое нефильтрованное") String beerName) {
         return searchService.searchInStock(beerName);
+    }
+
+    @Operation(summary = "Поиск пива, которое есть в продаже в конкретном магазине")
+    @GetMapping("/certain-store")
+    public Page<BeerDto> searchForBeers(@NotBlank @RequestParam(required = false) @Parameter(description = "Id конкретного магазина", example = "W_cPwW5eqk9kxe2OxgivJzVgu") String storeId,
+                                        @RequestParam @Parameter(description = "Номер выводимой страницы", example = "5") Integer pageNumber,
+                                        @RequestParam @Parameter(description = "Количество элементов на странице", example = "10") Integer pageSize) {
+        return searchService.searchForBeer(storeId, pageNumber, pageSize);
     }
 }

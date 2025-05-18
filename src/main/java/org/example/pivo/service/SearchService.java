@@ -9,16 +9,25 @@ import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.model.entity.StoreEntity;
+import org.example.pivo.model.entity.TypeEntity;
 import org.example.pivo.model.exceptions.NotFoundException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.repository.TypeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +93,49 @@ public class SearchService {
         return all.stream()
                 .map(storeMapper::toDto)
                 .toList();
+    }
+
+    public List<StoreDto> searchForStores(List<BeerEntity> beers) {
+        Specification<StorageEntity> spec = Specification.where(null);
+        for (BeerEntity beer : beers) {
+            var beerId = beerRepository.findByName(beer.getName()).getId();
+            spec = spec.and(beerSpecification.correctBeer(beerId));
+            spec = spec.and(beerSpecification.hasBeer());
+        }
+        var allStorages = storageRepository.findAll(spec);
+        if (allStorages.isEmpty()) {
+            return List.of();
+        }
+        List<StoreEntity> all = allStorages.stream()
+                .map(b -> storeRepository.findById(b.getStore())
+                        .orElseThrow(()-> new NotFoundException("Магазин не найден")))
+                .toList();
+        return all.stream()
+                .map(storeMapper::toDto)
+                .toList();
+    }
+
+    public Page<BeerDto> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
+        var storages = storageRepository.findAll(beerSpecification.correctStorages(storeId));
+        if(storages == null) {
+            return Page.empty();
+        }
+        var beers = storages.stream()
+                .map(StorageEntity::getBeer)
+                .map(beerRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+        var beerTypes = beers.stream()
+                .map(BeerEntity::getType)
+                .distinct()
+                .map(typeRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toMap(TypeEntity::getId, Function.identity()));
+        var result = new ArrayList<BeerDto>();
+        beers.forEach(t -> result.add(beerMapper.toDto(t, beerTypes.get(t.getType()))));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return new PageImpl<>(result, pageable, beers.size());
     }
 }

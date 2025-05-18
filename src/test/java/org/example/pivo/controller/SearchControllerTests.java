@@ -3,7 +3,9 @@ package org.example.pivo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.example.pivo.config.PostgresInitializer;
+import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.repository.BeerRepository;
+import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.BeerData;
 import org.example.pivo.utils.data.StoreData;
@@ -19,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @SpringBootTest
@@ -35,11 +38,14 @@ public class SearchControllerTests {
     private String genericId = "W_cPwW5eqk9kxe2OxgivJzVgu";
     @Autowired
     private StoreRepository storeRepository;
+    @Autowired
+    private StorageRepository storageRepository;
 
     @BeforeEach
     public void setUp() {
         storeRepository.deleteAll();
         beerRepository.deleteAll();
+        storageRepository.deleteAll();
     }
 
     @Test
@@ -100,5 +106,42 @@ public class SearchControllerTests {
                 .getResponse()
                 .getContentAsString();
         JsonAssertions.assertThatJson(result.equals(storeListString));
+    }
+
+
+
+    @Test
+    void searchForBeersTest() throws Exception {
+        var beerEntity1 = BeerData.beerEntityLager();
+        var beerEntity2 = BeerData.beerEntityAle();
+        beerRepository.save(beerEntity1);
+        beerRepository.save(beerEntity2);
+        var storeEntity = StoreData.storeEntity1();
+        String storeId = storeRepository.save(storeEntity).getId();
+        var storageEntity1 = StorageEntity.builder()
+                .beer(beerEntity1.getId())
+                .store(storeEntity.getId())
+                .count(BigInteger.valueOf(10))
+                .build();
+        var storageEntity2 = StorageEntity.builder()
+                .beer(beerEntity2.getId())
+                .store(storeEntity.getId())
+                .count(BigInteger.valueOf(100))
+                .build();
+        storageRepository.save(storageEntity1);
+        storageRepository.save(storageEntity2);
+        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/certain-store")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("storeId", storeId)
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonAssertions.assertThatJson(result)
+                .inPath("$.content[0].name").isEqualTo("Жигули Барное светлое фильтрованное");
+        JsonAssertions.assertThatJson(result)
+                .inPath("$.content[1].name").isEqualTo("Troll Brew IPA светлое нефильтрованное");
     }
 }

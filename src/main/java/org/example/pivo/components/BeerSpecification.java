@@ -3,10 +3,12 @@ package org.example.pivo.components;
 
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
+import org.example.pivo.model.entity.StoreEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Component
 public class BeerSpecification {
@@ -49,5 +51,10 @@ public class BeerSpecification {
     public Specification<StorageEntity> hasBeer() {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.greaterThanOrEqualTo(root.get("count"), 1);
+    }
+
+    public Specification<StorageEntity> correctStorages(String storeId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("store"), storeId);
     }
 }
