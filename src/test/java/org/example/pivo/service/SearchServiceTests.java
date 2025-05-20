@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions;
 import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.mapper.StoreMapper;
-import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.repository.BeerRepository;
@@ -18,7 +17,6 @@ import org.example.pivo.utils.data.TypeData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.Builder;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
@@ -30,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 
@@ -53,7 +50,6 @@ public class SearchServiceTests {
     private String storeId2 = "inSV3fZx2Ai1bn0CjaDvFkIxw";
     private String storeId3 = "XFPSsDSfIlQ77CKTRkkBq";
     private String storeId4 = "W_cPwW5eqk9kxe2OxgivJzVgu";
-    private String storageId1 = "phpIoHFCT8fc5GEZqCZQimYxD";
     private Integer pageNumber = 0;
     private Integer pageSize = 10;
 

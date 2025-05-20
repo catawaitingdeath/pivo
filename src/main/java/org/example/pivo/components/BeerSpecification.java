@@ -3,12 +3,10 @@ package org.example.pivo.components;
 
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
-import org.example.pivo.model.entity.StoreEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Component
 public class BeerSpecification {

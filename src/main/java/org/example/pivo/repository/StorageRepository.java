@@ -1,6 +1,5 @@
 package org.example.pivo.repository;
 
-import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

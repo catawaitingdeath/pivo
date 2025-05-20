@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
-import org.example.pivo.model.entity.BeerEntity;
-import org.example.pivo.service.BeerService;
 import org.example.pivo.service.SearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,7 +54,7 @@ public class SearchController {
 
     @Operation(summary = "Поиск магазинов, где в продаже есть все позиции из списка пива")
     @GetMapping("/stores")
-    public Set<StoreDto> searchForStores(@NotBlank @RequestParam(required = false) @Parameter(description = "список сущностей искомых пив", example = "") List<String> beers) {
+    public Set<StoreDto> searchForStores(@NotBlank @RequestParam(required = false) @Parameter(description = "список сущностей искомых пив") List<String> beers) {
         return searchService.searchForStores(beers);
     }
 
