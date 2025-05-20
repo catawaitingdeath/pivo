@@ -19,6 +19,18 @@ public class StoreData {
         return entity;
     }
 
+    public static StoreEntity storeEntity3(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity3.json", StoreEntity.class);
+        entity.setId(id);
+        return entity;
+    }
+
+    public static StoreEntity storeEntity4(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity4.json", StoreEntity.class);
+        entity.setId(id);
+        return entity;
+    }
+
     public static StoreEntity storeEntity1() {
         return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity1.json", StoreEntity.class);
     }

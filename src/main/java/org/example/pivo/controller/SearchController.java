@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/beer/search")
@@ -28,19 +29,23 @@ public class SearchController {
 
     @Operation(summary = "Регистронезависимый поиск пива по части названия")
     @GetMapping("/by-name")
-    public List<BeerDto> searchByName(@NotBlank @RequestParam @Parameter(description = "Полное или частичное название", example = "Troll") String name) {
-        return searchService.searchByName(name);
+    public Page<BeerDto> searchByName(@NotBlank @RequestParam @Parameter(description = "Полное или частичное название", example = "Troll") String name,
+                                      @RequestParam @Parameter(description = "Номер выводимой страницы", example = "5") Integer pageNumber,
+                                      @RequestParam @Parameter(description = "Количество элементов на странице", example = "10") Integer pageSize) {
+        return searchService.searchByName(name, pageNumber, pageSize);
     }
 
     @Operation(summary = "Поиск пива по заданным критериям (производитель, тип, цена, содержание алкоголя)")
     @GetMapping("/by-criteria")
-    public List<BeerDto> searchByCriteria(@RequestParam(required = false) String producer,
+    public Page<BeerDto> searchByCriteria(@RequestParam(required = false) String producer,
                                           @RequestParam(required = false) BigDecimal minAlcohol,
                                           @RequestParam(required = false) BigDecimal maxAlcohol,
                                           @RequestParam(required = false) BigDecimal minPrice,
                                           @RequestParam(required = false) BigDecimal maxPrice,
-                                          @RequestParam(required = false) String type) {
-        return searchService.searchByCriteria(producer, minAlcohol, maxAlcohol, minPrice, maxPrice, type);
+                                          @RequestParam(required = false) String type,
+                                          @RequestParam @Parameter(description = "Номер выводимой страницы", example = "5") Integer pageNumber,
+                                          @RequestParam @Parameter(description = "Количество элементов на странице", example = "10") Integer pageSize) {
+        return searchService.searchByCriteria(producer, minAlcohol, maxAlcohol, minPrice, maxPrice, type, pageNumber, pageSize);
     }
 
     @Operation(summary = "Поиск магазинов, где в продаже есть конкретное пиво")
@@ -51,7 +56,7 @@ public class SearchController {
 
     @Operation(summary = "Поиск магазинов, где в продаже есть все позиции из списка пива")
     @GetMapping("/stores")
-    public List<StoreDto> searchForStores(@NotBlank @RequestParam(required = false) @Parameter(description = "список сущностей искомых пив", example = "") List<BeerEntity> beers) {
+    public Set<StoreDto> searchForStores(@NotBlank @RequestParam(required = false) @Parameter(description = "список сущностей искомых пив", example = "") List<String> beers) {
         return searchService.searchForStores(beers);
     }
 

@@ -43,16 +43,6 @@ public class BeerSpecification {
                 criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice);
     }
 
-    public Specification<StorageEntity> correctBeer(String beerId) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("beer"), beerId);
-    }
-
-    public Specification<StorageEntity> hasBeer() {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.greaterThanOrEqualTo(root.get("count"), 1);
-    }
-
     public Specification<StorageEntity> correctStorages(String storeId) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("store"), storeId);

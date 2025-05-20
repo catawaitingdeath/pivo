@@ -23,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,15 +39,16 @@ public class SearchService {
     private final StoreMapper storeMapper;
     private final BeerSpecification beerSpecification;
 
-    public List<BeerDto> searchByName(String name) {
-        List<BeerEntity> result = beerRepository.findByNameContainingIgnoreCase(name);
-        return result.stream()
+    public Page<BeerDto> searchByName(String name, Integer pageNumber, Integer pageSize) {
+        List<BeerEntity> beers = beerRepository.findByNameContainingIgnoreCase(name);
+        var result = beers.stream()
                 .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType())
                         .orElseThrow(() -> new NotFoundException("Тип не найден"))))
                 .toList();
+        return new PageImpl<>(result, PageRequest.of(pageNumber, pageSize), beers.size());
     }
 
-    public List<BeerDto> searchByCriteria(String producer, BigDecimal minAlcohol, BigDecimal maxAlcohol, BigDecimal minPrice, BigDecimal maxPrice, String type) {
+    public Page<BeerDto> searchByCriteria(String producer, BigDecimal minAlcohol, BigDecimal maxAlcohol, BigDecimal minPrice, BigDecimal maxPrice, String type, Integer pageNumber, Integer pageSize) {
         Specification<BeerEntity> spec = Specification.where(null);
 
         if (producer != null) {
@@ -68,23 +70,20 @@ public class SearchService {
             spec = spec.and(beerSpecification.hasType(type));
         }
         List<BeerEntity> all = beerRepository.findAll(spec);
-        return all.stream()
+        var result = all.stream()
                 .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType())
                         .orElseThrow(() -> new NotFoundException("Тип не найден"))))
                 .toList();
+        return new PageImpl<>(result, PageRequest.of(pageNumber, pageSize), all.size());
     }
 
     public List<StoreDto> searchInStock(String beerName) {
         var beerId = beerRepository.findByName(beerName).getId();
-        Specification<StorageEntity> spec = Specification.where(null);
-        spec = spec.and(beerSpecification.correctBeer(beerId));
-        spec = spec.and(beerSpecification.hasBeer());
-        //var spec = beerSpecification.correctBeer(beerId).and(beerSpecification.hasBeer());
-        var allStorages = storageRepository.findAll(spec);
-        if (allStorages.isEmpty()) {
+        var storages = storageRepository.findAllByBeerAndCountGreaterThan(beerId, BigInteger.ZERO);
+        if (storages.isEmpty()) {
             return List.of();
         }
-        List<StoreEntity> all = allStorages.stream()
+        List<StoreEntity> all = storages.stream()
                 .map(b -> storeRepository.findById(b.getStore())
                         .orElseThrow(()-> new NotFoundException("Магазин не найден")))
                 .toList();
@@ -93,16 +92,16 @@ public class SearchService {
                 .toList();
     }
 
-    public List<StoreDto> searchForStores(List<BeerEntity> beers) {
-        Set<StoreDto> stores = new HashSet<>(searchInStock(beers.getFirst().getName()));
-        for (BeerEntity beer : beers) {
-            var storesList = searchInStock(beer.getName());
+    public Set<StoreDto> searchForStores(List<String> beers) {
+        Set<StoreDto> stores = new HashSet<>(searchInStock(beers.getFirst()));
+        for (String beer : beers) {
+            var storesList = searchInStock(beer);
             stores.retainAll(storesList);
             if (stores.isEmpty()) {
-                return List.of();
+                return Set.of();
             }
         }
-        return new ArrayList<>(stores);
+        return stores;
     }
 
     public Page<BeerDto> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
