@@ -6,11 +6,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
-import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.service.BeerService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,22 +37,38 @@ public class BeerController {
 
     @Operation(summary = "Поиск всех сущностей пива в репозитории")
     @GetMapping
-    public Page<BeerDto> getAll(@RequestParam @Parameter(description = "Номер выводимой страницы", example = "5") Integer pageNumber,
-                                @RequestParam @Parameter(description = "Количество элементов на странице", example = "10") Integer pageSize) {
-
+    public Page<BeerDto> getAll(
+            @RequestParam(defaultValue = "0")
+            @Parameter(description = "Номер выводимой страницы", example = "5")
+            Integer pageNumber,
+            @RequestParam(defaultValue = "10")
+            @Parameter(description = "Количество элементов на странице", example = "10")
+            Integer pageSize
+    ) {
         return beerService.getAll(pageNumber, pageSize);
     }
 
     @Operation(summary = "Поиск пива в репозитории по его id")
     @GetMapping("/{id}")
-    public BeerDto getBeer(@NotBlank @PathVariable @Parameter(description = "Id искомого пива", example = "W_cPwW5eqk9kxe2OxgivJzVgu") String id) {
+    public BeerDto getBeer(
+            @NotBlank
+            @PathVariable
+            @Parameter(description = "Id искомого пива", example = "W_cPwW5eqk9kxe2OxgivJzVgu")
+            String id
+    ) {
         return beerService.get(id);
     }
 
     @Operation(summary = "Поиск пива, у которого цена больше или равна переданной и алкоголь равен переданному")
     @GetMapping("/custom")
-    public List<BeerEntity> getBeer(@RequestParam @Parameter(description = "Миниальная цена искомого пива", example = "100.99") BigDecimal price,
-                                    @RequestParam @Parameter(description = "Содержание алкоголя у искомого пива", example = "7.9") BigDecimal alcohol) {
+    public List<BeerEntity> getBeer(
+            @RequestParam
+            @Parameter(description = "Миниальная цена искомого пива", example = "100.99")
+            BigDecimal price,
+            @RequestParam
+            @Parameter(description = "Содержание алкоголя у искомого пива", example = "7.9")
+            BigDecimal alcohol
+    ) {
         return beerService.custom(price, alcohol);
     }
 }

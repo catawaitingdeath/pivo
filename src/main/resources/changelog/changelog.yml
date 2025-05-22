@@ -11,8 +11,4 @@ databaseChangeLog:
       file: changelog/2025-05-07/storage-ddl.sql
   - include:
       file: changelog/2025-05-12/storage_changed_id-ddl.sql
-  - include:
-      file: changelog/2025-05-15/variables_added-ddl.sql
-  - include:
-      file: changelog/2025-05-18/variable_added-ddl.sql
 

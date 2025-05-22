@@ -8,6 +8,7 @@ import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.BeerData;
+import org.example.pivo.utils.data.StorageData;
 import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigInteger;
 import java.util.List;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -50,18 +54,20 @@ public class SearchControllerTests {
 
     @Test
     void searchByNameTest() throws Exception {
-        var beerEntityLager = beerRepository.save(BeerData.beerEntityLager());
         beerRepository.save(BeerData.beerEntityAle());
-        var expectedList = List.of(BeerData.beerDtoLager(beerEntityLager.getId()));
-        var expectedListString = jacksonObjectMapper.writeValueAsString(expectedList);
+        beerRepository.save(BeerData.beerEntityPorter());
+        beerRepository.save(BeerData.beerEntityStout());
         var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/by-name")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("name", "игули"))
+                        .param("name", "игули")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        JsonAssertions.assertThatJson(result.equals(expectedListString));
+        JsonAssertions.assertThatJson(result)
+                .inPath("$.content[0].name").isEqualTo("Жигули Барное светлое фильтрованное");
     }
 
     @Test
@@ -93,19 +99,21 @@ public class SearchControllerTests {
     void searchInStockTest() throws Exception {
         var beerEntityLager = BeerData.beerEntityLager();
         var beerEntityAle = BeerData.beerEntityAle();
-        beerRepository.save(beerEntityLager);
+        var beerId = beerRepository.save(beerEntityLager).getId();
         beerRepository.save(beerEntityAle);
-        storeRepository.save(StoreData.storeEntity1());
-        var storeList = List.of(StoreData.storeDto1(genericId));
+        var storeId = storeRepository.save(StoreData.storeEntity1()).getId();
+        var storageEntity = StorageData.storageEntity1();
+        storageEntity.setBeer(beerId);
+        storageEntity.setStore(storeId);
+        storageRepository.save(storageEntity);
+        storeRepository.save(StoreData.storeEntity2());
+        var storeList = List.of(StoreData.storeDto1(storeId));
         var storeListString = jacksonObjectMapper.writeValueAsString(storeList);
-        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/in-stock")
+        mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/in-stock")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("beerName", beerEntityLager.getName()))
+                        .param("beerId", beerId))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        JsonAssertions.assertThatJson(result.equals(storeListString));
+                .andExpect(content().json(storeListString));
     }
 
 
@@ -130,18 +138,13 @@ public class SearchControllerTests {
                 .build();
         storageRepository.save(storageEntity1);
         storageRepository.save(storageEntity2);
-        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/certain-store")
+        mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/certain-store")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("storeId", storeId)
                         .param("pageNumber", "0")
                         .param("pageSize", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        JsonAssertions.assertThatJson(result)
-                .inPath("$.content[0].name").isEqualTo("Жигули Барное светлое фильтрованное");
-        JsonAssertions.assertThatJson(result)
-                .inPath("$.content[1].name").isEqualTo("Troll Brew IPA светлое нефильтрованное");
+                .andExpect(jsonPath("$.content[0].name").value("Жигули Барное светлое фильтрованное"))
+                .andExpect(jsonPath("$.content[1].name").value("Troll Brew IPA светлое нефильтрованное"));
     }
 }

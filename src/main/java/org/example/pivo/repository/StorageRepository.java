@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Set;
 
 public interface StorageRepository extends CrudRepository<StorageEntity, String> {
 
@@ -16,4 +17,6 @@ public interface StorageRepository extends CrudRepository<StorageEntity, String>
     Page<StorageEntity> findAll(Pageable pageable);
 
     List<StorageEntity> findAllByBeerAndCountGreaterThan(String beer, BigInteger count);
+
+    List<StorageEntity> findAllByStore (String storeId);
 }

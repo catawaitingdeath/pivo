@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
-import org.example.pivo.model.exceptions.NotFoundException;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.StoreRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +39,6 @@ public class StoreService {
     public StoreDto get(String id) {
         return storeRepository.findById(id)
                 .map(storeMapper::toDto)
-                .orElseThrow(()-> new NotFoundException("Предоставлен неверный id"));
+                .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
     }
 }

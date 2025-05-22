@@ -74,9 +74,7 @@ public class BeerControllerTests {
         beerRepository.save(beerEntity1);
         beerRepository.save(beerEntity2);
         var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("pageNumber", "0")
-                        .param("pageSize", "10"))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn()
                 .getResponse()

@@ -5,10 +5,9 @@ import org.example.pivo.mapper.StorageMapper;
 import org.example.pivo.model.dto.StorageDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
-import org.example.pivo.model.exceptions.NotFoundException;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.utils.data.StorageData;
-import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -109,7 +108,7 @@ public class StorageServiceTests {
     void getStorage_ThrowError() {
         Mockito.doReturn(Optional.empty()).when(mockStorageRepository).findById("0");
 
-        var exception = assertThrows(NotFoundException.class, () -> storageService.get("0"));
+        var exception = assertThrows(NotFoundPivoException.class, () -> storageService.get("0"));
         Assertions.assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }

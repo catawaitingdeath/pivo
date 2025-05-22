@@ -7,10 +7,8 @@ import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
-import org.example.pivo.model.entity.StorageEntity;
-import org.example.pivo.model.entity.StoreEntity;
 import org.example.pivo.model.entity.TypeEntity;
-import org.example.pivo.model.exceptions.NotFoundException;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
@@ -23,8 +21,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,15 +38,31 @@ public class SearchService {
     private final BeerSpecification beerSpecification;
 
     public Page<BeerDto> searchByName(String name, Integer pageNumber, Integer pageSize) {
-        List<BeerEntity> beers = beerRepository.findByNameContainingIgnoreCase(name);
-        var result = beers.stream()
-                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType())
-                        .orElseThrow(() -> new NotFoundException("Тип не найден"))))
-                .toList();
-        return new PageImpl<>(result, PageRequest.of(pageNumber, pageSize), beers.size());
+        var beers = beerRepository.findByNameContainingIgnoreCase(name, PageRequest.of(pageNumber, pageSize));
+        var typeIds = beers.stream()
+                .map(BeerEntity::getType)
+                .collect(Collectors.toSet());
+        var beerTypes = typeRepository.findByIdIn(typeIds).stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
+        return beers.map(b -> beerMapper.toDto(b, beerTypes.get(b.getType())));
     }
 
-    public Page<BeerDto> searchByCriteria(String producer, BigDecimal minAlcohol, BigDecimal maxAlcohol, BigDecimal minPrice, BigDecimal maxPrice, String type, Integer pageNumber, Integer pageSize) {
+    public Page<BeerDto> searchByCriteria(
+            String producer,
+            BigDecimal minAlcohol,
+            BigDecimal maxAlcohol,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            String type,
+            Integer pageNumber,
+            Integer pageSize
+    ) {
+        if (producer == null && minAlcohol == null && maxAlcohol == null && minPrice == null && maxPrice == null
+                && type == null) {
+            return Page.empty();
+        }
+
         Specification<BeerEntity> spec = Specification.where(null);
 
         if (producer != null) {
@@ -69,30 +84,40 @@ public class SearchService {
             spec = spec.and(beerSpecification.hasType(type));
         }
         List<BeerEntity> all = beerRepository.findAll(spec);
+        var typeIds = all.stream()
+                .map(BeerEntity::getType)
+                .collect(Collectors.toSet());
+        var beerTypes = typeRepository.findByIdIn(typeIds).stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
         var result = all.stream()
-                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType())
-                        .orElseThrow(() -> new NotFoundException("Тип не найден"))))
+                .map(b -> beerMapper.toDto(b, beerTypes.get(b.getType())))
                 .toList();
-        return new PageImpl<>(result, PageRequest.of(pageNumber, pageSize), all.size());
+        int fromIndex = pageNumber * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, result.size());
+        return new PageImpl<>(result.subList(fromIndex, toIndex), PageRequest.of(pageNumber, pageSize), result.size());
     }
 
-    public List<StoreDto> searchInStock(String beerName) {
-        var beerId = beerRepository.findByName(beerName).getId();
-        var storages = storageRepository.findAllByBeerAndCountGreaterThan(beerId, BigInteger.ZERO);
-        if (storages.isEmpty()) {
-            return List.of();
+    public Page<StoreDto> searchInStock(String beerId, Integer pageNumber, Integer pageSize) {
+        if (!beerRepository.existsById(beerId)) {
+            throw new NotFoundPivoException("Не найдено пива с таким id");
         }
-        List<StoreEntity> all = storages.stream()
-                .map(b -> storeRepository.findById(b.getStore())
-                        .orElseThrow(()-> new NotFoundException("Магазин не найден")))
-                .toList();
-        return all.stream()
+        var stores = storeRepository.findStoresByBeerFromStorage(beerId);
+        if (stores.isEmpty()) {
+            return Page.empty();
+        }
+        var storeDtos = stores.stream()
                 .map(storeMapper::toDto)
                 .toList();
+        int fromIndex = pageNumber * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, storeDtos.size());
+        return new PageImpl<>(storeDtos.subList(fromIndex, toIndex),
+                PageRequest.of(pageNumber, pageSize),
+                storeDtos.size());
     }
 
     public Set<StoreDto> searchForStores(List<String> beers) {
-        Set<StoreDto> stores = new HashSet<>(searchInStock(beers.getFirst()));
+        /*Set<StoreDto> stores = new HashSet<>(searchInStock(beers.getFirst()));
         for (String beer : beers) {
             var storesList = searchInStock(beer);
             stores.retainAll(storesList);
@@ -100,36 +125,22 @@ public class SearchService {
                 return Set.of();
             }
         }
-        return stores;
+        return stores;*/
+        return Set.of();
     }
 
     public Page<BeerDto> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
-        var storages = storageRepository.findAll(beerSpecification.correctStorages(storeId));
-        if(storages == null) {
-            return Page.empty();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        var beers = storeRepository.findBeersByStoreId(storeId, pageable);
+        if (beers == null) {
+            throw new NotFoundPivoException("Пиво в указанном магазине не было найдено");
         }
-        var result = new ArrayList<BeerDto>();
-        var beerIds = storages.stream()
-                .map(StorageEntity::getBeer)
-                .toList();
-        var beers = beerIds.stream()
-                .map(beerRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
         var typeIds = beers.stream()
                 .map(BeerEntity::getType)
-                .toList();
-        var types = typeIds.stream()
-                .map(typeRepository::findById)
-                .toList();
-        var beerTypes = types.stream()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .collect(Collectors.toSet());
+        var beerTypes = typeRepository.findByIdIn(typeIds).stream()
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
-
-        beers.forEach(t -> result.add(beerMapper.toDto(t, beerTypes.get(t.getType()))));
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return new PageImpl<>(result, pageable, beers.size());
+        return beers.map(b -> beerMapper.toDto(b, beerTypes.get(b.getType())));
     }
 }

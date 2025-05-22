@@ -1,28 +1,23 @@
 package org.example.pivo.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.TypeEntity;
-import org.example.pivo.model.exceptions.NotFoundException;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +30,7 @@ public class BeerService {
     public BeerDto create(CreateBeerDto beer) {
         BeerEntity beerEntity = beerMapper.toEntity(beer);
         var typeEntity = typeRepository.findByName(beer.getTypeName())
-                .orElseThrow(()-> new NotFoundException("Тип не найден"));
+                .orElseThrow(()-> new NotFoundPivoException("Тип не найден"));
         beerEntity.setType(typeEntity.getId());
         beerEntity = beerRepository.save(beerEntity);
         return beerMapper.toDto(beerEntity, typeEntity);
@@ -49,13 +44,8 @@ public class BeerService {
         }
         var typeIds = beers.stream()
                 .map(BeerEntity::getType)
-                .toList();
-        var types = typeIds.stream()
-                .map(typeRepository::findById)
-                .toList();
-        var beerTypes = types.stream()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .collect(Collectors.toSet());
+        var beerTypes = typeRepository.findByIdIn(typeIds).stream()
                 .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
 
         beers.forEach(t -> result.add(beerMapper.toDto(t, beerTypes.get(t.getType()))));
@@ -64,9 +54,9 @@ public class BeerService {
 
     public BeerDto get(String id) {
         var beerEntity = beerRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("Предоставлен неверный id"));
+                .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
         var type = typeRepository.findById(beerEntity.getType())
-                .orElseThrow(() -> new NotFoundException("Тип не найден"));
+                .orElseThrow(() -> new NotFoundPivoException("Тип не найден"));
         return beerMapper.toDto(beerEntity, type);
     }
 

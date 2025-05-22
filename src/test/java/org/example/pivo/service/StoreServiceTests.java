@@ -5,7 +5,7 @@ import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StoreEntity;
-import org.example.pivo.model.exceptions.NotFoundException;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
@@ -108,7 +108,7 @@ public class StoreServiceTests {
     void getStore_ThrowError() {
         Mockito.doReturn(Optional.empty()).when(mockStoreRepository).findById("0");
 
-        var exception = assertThrows(NotFoundException.class, () -> storeService.get("0"));
+        var exception = assertThrows(NotFoundPivoException.class, () -> storeService.get("0"));
         Assertions.assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }

@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.entity.BeerEntity;
-import org.example.pivo.model.exceptions.NotFoundException;
+import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
 import org.example.pivo.utils.data.BeerData;
@@ -19,8 +19,10 @@ import org.springframework.data.domain.PageRequest;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -91,15 +93,15 @@ public class BeerServiceTests {
         beerEntityList.add(beerEntityLager);
         var typeEntityLager = TypeData.typeEntityLager(BigInteger.valueOf(2));
         var typeEntityAle = TypeData.typeEntityAle(BigInteger.valueOf(1));
+        var typeIds = Set.of(BigInteger.valueOf(1), BigInteger.valueOf(2));
         var pageNumber = 0;
         var pageSize = 10;
 
         Mockito.doReturn(new PageImpl<>(beerEntityList)).when(mockBeerRepository).findAll(PageRequest.of(pageNumber, pageSize));
-        Mockito.doReturn(Optional.of(typeEntityLager)).when(mockTypeRepository).findById(BigInteger.valueOf(2));
-        Mockito.doReturn(Optional.of(typeEntityAle)).when(mockTypeRepository).findById(BigInteger.valueOf(1));
+        Mockito.doReturn(List.of(typeEntityAle, typeEntityLager)).when(mockTypeRepository).findByIdIn(typeIds);
 
         var actual = beerService.getAll(pageNumber, pageSize);
-        Assertions.assertThat(actual)
+        Assertions.assertThat(actual.getContent())
                 .isNotNull()
                 .containsExactlyInAnyOrderElementsOf(beerDtoList);
     }
@@ -137,7 +139,7 @@ public class BeerServiceTests {
     void getBeer_ThrowError() {
         Mockito.doReturn(Optional.empty()).when(mockBeerRepository).findById("0");
 
-        var exception = assertThrows(NotFoundException.class, () -> beerService.get("0"));
+        var exception = assertThrows(NotFoundPivoException.class, () -> beerService.get("0"));
         Assertions.assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
     }
