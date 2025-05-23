@@ -59,7 +59,11 @@ public class StorageController {
 
     @Operation(summary = "Поставка пивандеполы")
     @PostMapping("/shipment")
-    public void ship(@Valid @RequestBody BeerShipmentDto beerShipmentDto) {
+    public void ship(
+            @Valid
+            @RequestBody
+            BeerShipmentDto beerShipmentDto
+    ) {
         storageService.ship(beerShipmentDto);
     }
 }

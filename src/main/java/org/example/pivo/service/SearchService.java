@@ -8,6 +8,7 @@ import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.TypeEntity;
+import org.example.pivo.model.exceptions.BadRequestPivoException;
 import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
@@ -60,7 +61,7 @@ public class SearchService {
     ) {
         if (producer == null && minAlcohol == null && maxAlcohol == null && minPrice == null && maxPrice == null
                 && type == null) {
-            return Page.empty();
+            throw new BadRequestPivoException("Критерии не были заданы");
         }
 
         Specification<BeerEntity> spec = Specification.where(null);

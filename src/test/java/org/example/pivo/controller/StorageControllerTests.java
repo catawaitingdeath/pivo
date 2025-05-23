@@ -3,6 +3,7 @@ package org.example.pivo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
+import org.example.pivo.model.dto.BeerShipmentDto;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
@@ -23,6 +24,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.math.BigInteger;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -101,5 +105,33 @@ public class StorageControllerTests {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().json(jsonStorage));
+    }
+
+    @Test
+    void shipmentTest() throws Exception {
+        var position1 = BeerShipmentDto.Position.builder()
+                .beerId(beerId1)
+                .count(BigInteger.TEN)
+                .build();
+        var position2 = BeerShipmentDto.Position.builder()
+                .beerId(beerId2)
+                .count(BigInteger.TEN)
+                .build();
+        var store = StoreData.storeEntity1(storeId1);
+        var storeShipment = BeerShipmentDto.StoreShipment.builder()
+                .storeId(store.getId())
+                .position(List.of(position1, position2))
+                .build();
+        var beerShipmentDto = BeerShipmentDto.builder()
+                .storeShipments(List.of(storeShipment))
+                .build();
+        var contentString = objectMapper.writeValueAsString(beerShipmentDto);
+        mockMvc.perform(MockMvcRequestBuilders.post("/storage/shipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(contentString))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        var storage = storageRepository.findAll();
+        Assertions.assertThat(storage)
+                .hasSize(2);
     }
 }

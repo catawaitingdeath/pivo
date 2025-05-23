@@ -2,6 +2,7 @@ package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
+import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.constants.BeerIds;
 import org.example.pivo.model.entity.StorageEntity;
@@ -127,12 +128,14 @@ public class SearchControllerTests {
         storageRepository.save(storageEntity2);
         storageRepository.save(storageEntity3);
         storageRepository.save(storageEntity4);
-        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/in-stock")
+        mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/in-stock")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("beerId", beerId)
                         .param("pageNumber", "1")
                         .param("pageSize", "2"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(4))
+                .andExpect(jsonPath("$.content.size()").value(2))
                 .andExpect(jsonPath("$.content[0].id").value(storeId3))
                 .andExpect(jsonPath("$.content[1].id").value(storeId4));
     }

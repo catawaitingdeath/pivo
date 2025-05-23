@@ -7,6 +7,7 @@ import org.example.pivo.constants.StoreIds;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.entity.BeerEntity;
+import org.example.pivo.model.exceptions.BadRequestPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
@@ -121,8 +122,8 @@ public class SearchServiceTests {
     @Test
     @DisplayName("Return an empty page")
     void searchByCriteriaTest_NoCriteria() {
-        var actual = searchService.searchByCriteria(null, null, null, null, null, null, pageNumber, pageSize);
-        Assertions.assertThat(actual).isNotNull().isEqualTo(Page.empty());
+        assertThatThrownBy(() -> searchService.searchByCriteria(null, null, null, null, null, null, pageNumber, pageSize))
+                .isInstanceOf(BadRequestPivoException.class);
         Mockito.verify(mockBeerSpecification, Mockito.times(0)).alcoholLessThan(Mockito.any());
         Mockito.verify(mockBeerSpecification, Mockito.times(0)).priceGreaterThan(Mockito.any());
         Mockito.verify(mockBeerSpecification, Mockito.times(0)).priceLessThan(Mockito.any());
