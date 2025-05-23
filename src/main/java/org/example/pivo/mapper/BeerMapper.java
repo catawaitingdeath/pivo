@@ -18,5 +18,7 @@ public abstract class BeerMapper {
     @Mapping(target = "name", source = "entity.name")
     public abstract BeerDto toDto(BeerEntity entity, TypeEntity typeEntity);
 
+    public abstract BeerDto toDto(BeerEntity entity, String typeName);
+
     public abstract BeerEntity toEntity(CreateBeerDto dto);
 }

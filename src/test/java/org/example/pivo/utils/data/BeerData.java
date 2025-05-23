@@ -25,12 +25,32 @@ public class BeerData {
         return entity;
     }
 
+    public static BeerEntity beerEntityPorter(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityPorter.json", BeerEntity.class);
+        entity.setId(id);
+        return entity;
+    }
+
+    public static BeerEntity beerEntityStout(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityStout.json", BeerEntity.class);
+        entity.setId(id);
+        return entity;
+    }
+
     public static BeerEntity beerEntityAle() {
         return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityAle.json", BeerEntity.class);
     }
 
     public static BeerEntity beerEntityLager() {
         return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityLager.json", BeerEntity.class);
+    }
+
+    public static BeerEntity beerEntityPorter() {
+        return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityPorter.json", BeerEntity.class);
+    }
+
+    public static BeerEntity beerEntityStout() {
+        return FileReaderUtility.readFile("/controllerFiles/beer/entity/beerEntityStout.json", BeerEntity.class);
     }
 
     public static BeerDto beerDtoAle(String id) {
@@ -41,6 +61,18 @@ public class BeerData {
 
     public static BeerDto beerDtoLager(String id) {
         var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoLager.json", BeerDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
+    public static BeerDto beerDtoStout(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoStout.json", BeerDto.class);
+        dto.setId(id);
+        return dto;
+    }
+
+    public static BeerDto beerDtoPorter(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/beer/dto/beerDtoPorter.json", BeerDto.class);
         dto.setId(id);
         return dto;
     }

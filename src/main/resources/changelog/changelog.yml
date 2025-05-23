@@ -12,4 +12,3 @@ databaseChangeLog:
   - include:
       file: changelog/2025-05-12/storage_changed_id-ddl.sql
 
-

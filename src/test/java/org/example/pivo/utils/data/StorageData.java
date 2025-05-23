@@ -39,11 +39,14 @@ public class StorageData {
         return dto;
     }
 
-    public static CreateStorageDto createStorageDto1() {
-        return FileReaderUtility.readFile("/controllerFiles/createStorage/createStorageDto1.json", CreateStorageDto.class);
+    public static CreateStorageDto createStorageDto1(String beerId, String storeId) {
+        var createDto = FileReaderUtility.readFile("/controllerFiles/createStorage/createStorageDto1.json", CreateStorageDto.class);
+        createDto.setBeer(beerId);
+        createDto.setStore(storeId);
+        return createDto;
     }
 
-    public static CreateStorageDto CreateStorageDto2() {
-        return FileReaderUtility.readFile("/controllerFiles/createStorage/createStorageDto2.json", CreateStorageDto.class);
+    public static CreateStorageDto createStorageDto1() {
+        return FileReaderUtility.readFile("/controllerFiles/createStorage/createStorageDto1.json", CreateStorageDto.class);
     }
 }

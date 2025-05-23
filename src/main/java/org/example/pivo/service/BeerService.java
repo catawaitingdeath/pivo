@@ -1,8 +1,6 @@
 package org.example.pivo.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
@@ -11,17 +9,15 @@ import org.example.pivo.model.entity.TypeEntity;
 import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.TypeRepository;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,61 +36,31 @@ public class BeerService {
         return beerMapper.toDto(beerEntity, typeEntity);
     }
 
-    public List<BeerDto> getAll() {
+    public Page<BeerDto> getAll(Integer pageNumber, Integer pageSize) {
         var result = new ArrayList<BeerDto>();
-        var beers = beerRepository.findAll();
-        var beerTypes = beers.stream()
+        var beers = beerRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        if(beers == null){
+            return Page.empty();
+        }
+        var typeIds = beers.stream()
                 .map(BeerEntity::getType)
-                .distinct()
-                .map(typeRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toMap(TypeEntity::getId, Function.identity()));
+                .collect(Collectors.toSet());
+        var beerTypes = typeRepository.findByIdIn(typeIds).stream()
+                .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
+
         beers.forEach(t -> result.add(beerMapper.toDto(t, beerTypes.get(t.getType()))));
-        return result;
+        return new PageImpl<>(result, beers.getPageable(), beers.getTotalElements());
     }
 
     public BeerDto get(String id) {
         var beerEntity = beerRepository.findById(id)
                 .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
-        return beerMapper.toDto(
-                beerEntity, typeRepository.findById(beerEntity.getType()).get());
+        var type = typeRepository.findById(beerEntity.getType())
+                .orElseThrow(() -> new NotFoundPivoException("Тип не найден"));
+        return beerMapper.toDto(beerEntity, type);
     }
 
     public List<BeerEntity> custom(BigDecimal price, BigDecimal alcohol) {
         return beerRepository.findAllByPriceGreaterThanAndAlcoholOrderByPriceDesc(price, alcohol);
     }
-
-    public List<BeerDto> caseInsensitiveSearch(String name) {
-        List<BeerDto> result = new ArrayList<>();
-        var beers = getAll();
-        for (var beer : beers) {
-            if (StringUtils.containsIgnoreCase(beer.getName(), name)) {
-                result.add(beer);
-            }
-        }
-        return result;
-    }
-
-    public List<BeerDto> searchByCriteria(String producer, BigDecimal minAlcohol, BigDecimal maxAlcohol, BigDecimal minPrice, BigDecimal maxPrice,String type) {
-        Specification<BeerEntity> spec = Specification.where(null);
-
-        if (producer != null) {
-            spec = spec.and(BeerSpecification.hasProducer(producer));
-        }
-        if (minAlcohol != null && maxAlcohol != null) {
-            spec = spec.and(BeerSpecification.alcoholBetween(minAlcohol, maxAlcohol));
-        }
-        if (minPrice != null && maxPrice != null) {
-            spec = spec.and(BeerSpecification.priceBetween(minPrice, maxPrice));
-        }
-        if (type != null) {
-            spec = spec.and(BeerSpecification.hasType(type));
-        }
-        List<BeerEntity> all = beerRepository.findAll(spec);
-        return all.stream()
-                .map(b -> beerMapper.toDto(b, typeRepository.findById(b.getType()).get()))
-                .toList();
-    }
-
 }

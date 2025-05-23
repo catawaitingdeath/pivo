@@ -2,17 +2,20 @@ package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
+import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.service.BeerService;
 import org.example.pivo.utils.data.BeerData;
+import org.hibernate.query.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,7 +25,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -37,13 +39,10 @@ public class BeerControllerTests {
     @Autowired
     private BeerRepository beerRepository;
     @Autowired
-    private BeerService beerService;
-    @Autowired
     private ObjectMapper jacksonObjectMapper;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private BeerMapper beerMapper;
+    private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
 
     @BeforeEach
     public void setUp() {
@@ -64,7 +63,7 @@ public class BeerControllerTests {
                                 }"""))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         var pivo = beerRepository.findAll();
-        assertThat(pivo)
+        Assertions.assertThat(pivo)
                 .hasSize(1);
     }
 
@@ -74,19 +73,25 @@ public class BeerControllerTests {
         var beerEntity2 = BeerData.beerEntityAle();
         beerRepository.save(beerEntity1);
         beerRepository.save(beerEntity2);
-        mockMvc.perform(MockMvcRequestBuilders.get("/beer")
+        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$[0].typeName").value("лагер"))
-                .andExpect(jsonPath("$[1].typeName").value("эль"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonAssertions.assertThatJson(result)
+                .inPath("$.content[0].name").isEqualTo("Жигули Барное светлое фильтрованное");
+        JsonAssertions.assertThatJson(result)
+                .inPath("$.content[1].name").isEqualTo("Troll Brew IPA светлое нефильтрованное");
     }
 
     @Test
     void getBeerTest() throws Exception {
-        var createBeerDto = BeerData.createBeerDtoLager();
-        var id = beerService.create(createBeerDto).getId();
-        String jsonBeer = objectMapper.writeValueAsString(createBeerDto);
-        mockMvc.perform(MockMvcRequestBuilders.get("/beer/{id}", id)
+        var beerEntity = BeerData.beerEntityLager(idLager);
+        beerRepository.save(beerEntity);
+        var beerDto = BeerData.beerDtoLager(idLager);
+        String jsonBeer = objectMapper.writeValueAsString(beerDto);
+        mockMvc.perform(MockMvcRequestBuilders.get("/beer/{id}", idLager)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().json(jsonBeer));
@@ -94,11 +99,11 @@ public class BeerControllerTests {
 
     @Test
     void customTest() throws Exception {
-        var createBeerDtoLager = BeerData.createBeerDtoLager();
-        var createBeerDtoAle = BeerData.createBeerDtoAle();
-        var idLager = beerService.create(createBeerDtoLager).getId();
-        var idAle = beerService.create(createBeerDtoAle).getId();
-        var expectedList = List.of(beerRepository.findById(idLager).get(), beerRepository.findById(idAle).get());
+        var beerEntityLager = BeerData.beerEntityLager();
+        var beerEntityAle = BeerData.beerEntityAle();
+        beerRepository.save(beerEntityLager);
+        beerRepository.save(beerEntityAle);
+        var expectedList = List.of(beerEntityLager);
         var expectedListString = jacksonObjectMapper.writeValueAsString(expectedList);
         mockMvc.perform(MockMvcRequestBuilders.get("/beer/custom")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,41 +113,5 @@ public class BeerControllerTests {
                 .andExpect(content().json(expectedListString));
     }
 
-    @Test
-    void searchByNameTest() throws Exception {
-        var createBeerDtoLager = BeerData.createBeerDtoLager();
-        var createBeerDtoAle = BeerData.createBeerDtoAle();
-        var idLager = beerService.create(createBeerDtoLager).getId();
-        beerService.create(createBeerDtoAle);
-
-        var expectedList = List.of(BeerData.beerDtoLager(idLager));
-        var expectedListString = jacksonObjectMapper.writeValueAsString(expectedList);
-        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/searchByName")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("name", "игули"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-        JsonAssertions.assertThatJson(result.getResponse().getContentAsString()).isEqualTo(expectedListString);
-    }
-
-    @Test
-    void searchByCriteriaTest() throws Exception {
-        var createBeerDtoLager = BeerData.createBeerDtoLager();
-        var createBeerDtoAle = BeerData.createBeerDtoAle();
-        var id = beerService.create(createBeerDtoLager).getId();
-        beerService.create(createBeerDtoAle);
-        var beerList = List.of(BeerData.beerDtoLager(id));
-        var beerListString = jacksonObjectMapper.writeValueAsString(beerList);
-        var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/searchByCriteria")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("minPrice", "10")
-                        .param("maxPrice", "80")
-                        .param("minAlcohol", "5")
-                        .param("maxAlcohol", "5"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-        JsonAssertions.assertThatJson(result.getResponse().getContentAsString()).isEqualTo(beerListString);
-
-    }
 
 }

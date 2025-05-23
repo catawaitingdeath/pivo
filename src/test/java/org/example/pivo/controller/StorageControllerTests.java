@@ -3,6 +3,7 @@ package org.example.pivo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
+import org.example.pivo.model.dto.BeerShipmentDto;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
@@ -24,6 +25,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -39,38 +43,31 @@ public class StorageControllerTests {
     @Autowired
     private StorageRepository storageRepository;
     @Autowired
-    private StorageService storageService;
-    @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private StoreService storeService;
     @Autowired
     private StoreRepository storeRepository;
     @Autowired
     private BeerRepository beerRepository;
-    @Autowired
-    private BeerService beerService;
-    private String beerId1;
-    private String beerId2;
-    private String storeId1;
-    private String storeId2;
+    private String beerId1 = "2IVPACIrIT-Tr2Gw-JoApXZKT";
+    private String beerId2 = "Ota-_XO_6Dc2nCKEU7LEmsi1K";
+    private String storeId1 = "S7TKIwtHDfoLOESVj16e_v3ie";
+    private String storeId2 = "inSV3fZx2Ai1bn0CjaDvFkIxw";
+    private String storageId1 = "phpIoHFCT8fc5GEZqCZQimYxD";
 
     @BeforeEach
     public void setUp() {
         storageRepository.deleteAll();
         storeRepository.deleteAll();
         beerRepository.deleteAll();
-        storeId1 = storeService.create(StoreData.createStoreDto1()).getId();
-        storeId2 = storeService.create(StoreData.createStoreDto2()).getId();
-        beerId1 = beerService.create(BeerData.createBeerDtoAle()).getId();
-        beerId2 = beerService.create(BeerData.createBeerDtoLager()).getId();
+        beerRepository.save(BeerData.beerEntityAle(beerId1));
+        beerRepository.save(BeerData.beerEntityLager(beerId2));
+        storeRepository.save(StoreData.storeEntity1(storeId1));
+        storeRepository.save(StoreData.storeEntity2(storeId2));
     }
 
     @Test
     void createTest() throws Exception {
-        var content = StorageData.createStorageDto1();
-        content.setBeer(beerId1);
-        content.setStore(storeId1);
+        var content = StorageData.createStorageDto1(beerId1, storeId1);
         var contentString = objectMapper.writeValueAsString(content);
         mockMvc.perform(MockMvcRequestBuilders.post("/storage")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,22 +89,49 @@ public class StorageControllerTests {
         storageRepository.save(storageEntity1);
         storageRepository.save(storageEntity2);
         mockMvc.perform(MockMvcRequestBuilders.get("/storage")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$[0].count").value("100"))
-                .andExpect(jsonPath("$[1].count").value("10"));
+                .andExpect(jsonPath("$.content[0].count").value("100"))
+                .andExpect(jsonPath("$.content[1].count").value("10"));
     }
 
     @Test
     void getStorageTest() throws Exception {
-        var createStorageDto = StorageData.createStorageDto1();
-        createStorageDto.setBeer(beerId1);
-        createStorageDto.setStore(storeId1);
-        var id = storageService.create(createStorageDto).getId();
-        String jsonStorage = objectMapper.writeValueAsString(createStorageDto);
-        mockMvc.perform(MockMvcRequestBuilders.get("/storage/{id}", id)
+        storageRepository.save(StorageData.storageEntity1(storageId1));
+        String jsonStorage = objectMapper.writeValueAsString(StorageData.storageDto1(storageId1));
+        mockMvc.perform(MockMvcRequestBuilders.get("/storage/{id}", storageId1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().json(jsonStorage));
+    }
+
+    @Test
+    void shipmentTest() throws Exception {
+        var position1 = BeerShipmentDto.Position.builder()
+                .beerId(beerId1)
+                .count(BigInteger.TEN)
+                .build();
+        var position2 = BeerShipmentDto.Position.builder()
+                .beerId(beerId2)
+                .count(BigInteger.TEN)
+                .build();
+        var store = StoreData.storeEntity1(storeId1);
+        var storeShipment = BeerShipmentDto.StoreShipment.builder()
+                .storeId(store.getId())
+                .position(List.of(position1, position2))
+                .build();
+        var beerShipmentDto = BeerShipmentDto.builder()
+                .storeShipments(List.of(storeShipment))
+                .build();
+        var contentString = objectMapper.writeValueAsString(beerShipmentDto);
+        mockMvc.perform(MockMvcRequestBuilders.post("/storage/shipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(contentString))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        var storage = storageRepository.findAll();
+        Assertions.assertThat(storage)
+                .hasSize(2);
     }
 }

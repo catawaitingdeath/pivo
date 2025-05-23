@@ -35,7 +35,7 @@ public class StorageEntity {
 
     @NotNull
     @Column(nullable = false)
-    @Positive(message = "Число бутылок пива должно быть положительным")
+    @PositiveOrZero(message = "Число бутылок пива должно быть неотрицательным")
     @Digits(integer = 1000, fraction = 0, message = "Число бутылок пива должно быть целым")
     private BigInteger count;
 

@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -35,9 +34,8 @@ public class StoreControllerTests {
     @Autowired
     private StoreRepository storeRepository;
     @Autowired
-    private StoreService storeService;
-    @Autowired
     private ObjectMapper objectMapper;
+    private String id = "W_cPwW5eqk9kxe2OxgivJzVgu";
 
     @BeforeEach
     public void setUp() {
@@ -55,7 +53,7 @@ public class StoreControllerTests {
                                 }"""))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         var store = storeRepository.findAll();
-        assertThat(store)
+        Assertions.assertThat(store)
                 .hasSize(1);
     }
 
@@ -66,17 +64,20 @@ public class StoreControllerTests {
         storeRepository.save(storeEntity1);
         storeRepository.save(storeEntity2);
         mockMvc.perform(MockMvcRequestBuilders.get("/store")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$[0].address").value("Ленинградское ш., 58с53, Москва"))
-                .andExpect(jsonPath("$[1].address").value("Просторная ул., 6, Москва"));
+                .andExpect(jsonPath("$.content[0].address").value("Ленинградское ш., 58с53, Москва"))
+                .andExpect(jsonPath("$.content[1].address").value("Просторная ул., 6, Москва"));
     }
 
     @Test
     void getStoreTest() throws Exception {
-        var createStoreDto = StoreData.createStoreDto1();
-        var id = storeService.create(createStoreDto).getId();
-        String jsonStore = objectMapper.writeValueAsString(createStoreDto);
+        var storeEntity = StoreData.storeEntity1(id);
+        storeRepository.save(storeEntity);
+        var storeDto = StoreData.storeDto1(id);
+        String jsonStore = objectMapper.writeValueAsString(storeDto);
         mockMvc.perform(MockMvcRequestBuilders.get("/store/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
