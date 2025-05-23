@@ -45,4 +45,6 @@ public interface StoreRepository extends CrudRepository<StoreEntity, String> {
             String storeId,
             Pageable pageable
     );
+
+    Page<StoreEntity> findStoresByIdIn(List<String> ids, Pageable pageable);
 }

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.StoreDto;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/beer/search")
@@ -93,13 +93,19 @@ public class SearchController {
 
     @Operation(summary = "Поиск магазинов, где в продаже есть все позиции из списка пива")
     @GetMapping("/stores")
-    public Set<StoreDto> searchForStores(
-            @NotBlank
+    public Page<StoreDto> searchForStores(
+            @Size(min = 1, message = "Список пив не должен быть пустым")
             @RequestParam(required = false)
-            @Parameter(description = "список сущностей искомых пив")
-            List<String> beers
+            @Parameter(description = "список Id искомых пив")
+            List<String> beers,
+            @RequestParam
+            @Parameter(description = "Номер выводимой страницы", example = "5")
+            Integer pageNumber,
+            @RequestParam
+            @Parameter(description = "Количество элементов на странице", example = "10")
+            Integer pageSize
     ) {
-        return searchService.searchForStores(beers);
+        return searchService.searchForStores(beers, pageNumber, pageSize);
     }
 
     @Operation(summary = "Поиск пива, которое есть в продаже в конкретном магазине")

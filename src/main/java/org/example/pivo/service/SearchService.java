@@ -116,17 +116,16 @@ public class SearchService {
                 storeDtos.size());
     }
 
-    public Set<StoreDto> searchForStores(List<String> beers) {
-        /*Set<StoreDto> stores = new HashSet<>(searchInStock(beers.getFirst()));
-        for (String beer : beers) {
-            var storesList = searchInStock(beer);
-            stores.retainAll(storesList);
-            if (stores.isEmpty()) {
-                return Set.of();
-            }
+    public Page<StoreDto> searchForStores(List<String> beers, Integer pageNumber, Integer pageSize) {
+        var storeIds = storageRepository.findStoreIdsWithAllBeers(beers);
+        if(storeIds.isEmpty()) {
+            return Page.empty();
         }
-        return stores;*/
-        return Set.of();
+        var storeEntities = storeRepository.findStoresByIdIn(storeIds, PageRequest.of(pageNumber, pageSize));
+        var stores = storeEntities.getContent().stream()
+                .map(storeMapper::toDto)
+                .toList();
+        return new PageImpl<>(stores, PageRequest.of(pageNumber, pageSize), storeEntities.getTotalElements());
     }
 
     public Page<BeerDto> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
