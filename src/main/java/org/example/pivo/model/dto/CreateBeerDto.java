@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.pivo.annotation.Normalize;
 
 import java.math.BigDecimal;
 
@@ -24,6 +25,7 @@ public class CreateBeerDto {
     @Size(max = 100, message = "Название пива не должно содержать больше 100 символов")
     private String name;
 
+    @Normalize("#this == null ? null : #this.substring(0,1).toUpperCase() + #this.substring(1).toLowerCase()")
     @Schema(example = "Московская пивоваренная компания", description = "Название производителя с большой буквы")
     @NotEmpty(message = "Поле не может быть пустым")
     @Size(max = 50, message = "Имя производителя пива не должно содержать больше 50 символов")

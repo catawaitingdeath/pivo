@@ -4,18 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
-import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.repository.BeerRepository;
-import org.example.pivo.service.BeerService;
 import org.example.pivo.utils.data.BeerData;
-import org.hibernate.query.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,7 +21,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -111,6 +105,28 @@ public class BeerControllerTests {
                         .param("alcohol", "5"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().json(expectedListString));
+    }
+
+    @Test
+    void createWithNormalizationTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/beer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "     Жигули Барное       светлое фильтрованное    ",
+                                  "producer": "московская      пивоваренная компания",
+                                  "price": 70,
+                                  "alcohol": 5,
+                                  "typeName": "лагер"
+                                }"""))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        var pivos = beerRepository.findAll();
+        Assertions.assertThat(pivos)
+                .hasSize(1);
+        var pivo = pivos.getFirst();
+        Assertions.assertThat(pivo)
+                .hasFieldOrPropertyWithValue("name", "Жигули Барное светлое фильтрованное")
+                .hasFieldOrPropertyWithValue("producer", "Московская      пивоваренная компания");
     }
 
 
