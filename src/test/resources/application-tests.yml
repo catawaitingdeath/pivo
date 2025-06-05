@@ -1,1 +1,3 @@
-
+beer-application:
+  urls:
+    employee: "http://localhost:10102"

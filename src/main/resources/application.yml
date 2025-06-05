@@ -22,6 +22,8 @@ beer-application:
   nanoid:
     size: 25
     alphabet: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-"
+  urls:
+    employee: "http://localhost:8081"
 springdoc:
   swagger-ui:
     path: "/swagger"

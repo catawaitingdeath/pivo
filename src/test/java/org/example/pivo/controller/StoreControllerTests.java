@@ -1,6 +1,7 @@
 package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.repository.StoreRepository;
@@ -39,6 +40,36 @@ public class StoreControllerTests {
 
     @BeforeEach
     public void setUp() {
+        WireMock.stubFor(WireMock.delete(WireMock.urlPathEqualTo("/employee/store/" + id))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                    {
+                                      "id": "%s",
+                                      "employees": [
+                                        {
+                                          "id": "id_1",
+                                          "name": "Alice",
+                                          "surname": "Johnson",
+                                          "phone": "79684551668",
+                                          "email": "alice.johnson@example.com",
+                                          "position": "Cashier",
+                                          "salary": 30000,
+                                          "store": "%s"
+                                        },
+                                        {
+                                          "id": "id_2",
+                                          "name": "Bob",
+                                          "surname": "Smith",
+                                          "phone": "79684551888",
+                                          "email": "bob.smith@example.com",
+                                          "position": "Manager",
+                                          "salary": 50000,
+                                          "store": "%s"
+                                        }
+                                      ]
+                                    }
+                                """.formatted(id))));
         storeRepository.deleteAll();
     }
 
@@ -84,4 +115,18 @@ public class StoreControllerTests {
                 .andExpect(content().json(jsonStore));
     }
 
+    @Test
+    void deleteStoreTest() throws Exception {
+        var storeEntity = StoreData.storeEntity1(id);
+        storeRepository.save(storeEntity);
+        var storesBefore = storeRepository.findAll();
+        Assertions.assertThat(storesBefore)
+                .hasSize(1);
+        mockMvc.perform(MockMvcRequestBuilders.delete("store/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        var storesAfter = storeRepository.findAll();
+        Assertions.assertThat(storesAfter)
+                .isEmpty();
+    }
 }

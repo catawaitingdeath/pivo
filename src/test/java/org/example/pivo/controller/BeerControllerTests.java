@@ -4,18 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
-import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.repository.BeerRepository;
-import org.example.pivo.service.BeerService;
 import org.example.pivo.utils.data.BeerData;
-import org.hibernate.query.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,7 +21,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,8 +32,6 @@ public class BeerControllerTests {
     private MockMvc mockMvc;
     @Autowired
     private BeerRepository beerRepository;
-    @Autowired
-    private ObjectMapper jacksonObjectMapper;
     @Autowired
     private ObjectMapper objectMapper;
     private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
@@ -104,7 +96,7 @@ public class BeerControllerTests {
         beerRepository.save(beerEntityLager);
         beerRepository.save(beerEntityAle);
         var expectedList = List.of(beerEntityLager);
-        var expectedListString = jacksonObjectMapper.writeValueAsString(expectedList);
+        var expectedListString = objectMapper.writeValueAsString(expectedList);
         mockMvc.perform(MockMvcRequestBuilders.get("/beer/custom")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("price", "10")

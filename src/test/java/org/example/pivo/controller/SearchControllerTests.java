@@ -2,15 +2,12 @@ package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
-import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
-import org.example.pivo.constants.BeerIds;
 import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.BeerData;
-import org.example.pivo.utils.data.StorageData;
 import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +24,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
