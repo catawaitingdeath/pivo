@@ -45,7 +45,7 @@ public class StoreServiceTests {
     void setup() {
         mockStoreRepository = mock(StoreRepository.class);
         mockEmployeeClient = mock(EmployeeClient.class);
-        storeService = new StoreService(mockEmployeeClient, mockStoreRepository, storeMapper);
+        storeService = new StoreService(mockEmployeeClient, mockStoreRepository, storeMapper, employeeMapper);
     }
 
     @Test
