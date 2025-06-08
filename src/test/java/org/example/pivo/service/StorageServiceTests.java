@@ -40,10 +40,10 @@ public class StorageServiceTests {
     @Test
     @DisplayName("Create a storage")
     void createStorage() {
-        var storageEntity = StorageData.storageEntity1(id1);
-        var storageEntityNullId = StorageData.storageEntity1();
-        var createStorageDto = StorageData.createStorageDto1();
-        var storageDto = StorageData.storageDto1(id1);
+        var storageEntity = StorageData.storageEntity100(id1);
+        var storageEntityNullId = StorageData.storageEntity100();
+        var createStorageDto = StorageData.createStorageDto100();
+        var storageDto = StorageData.storageDto100(id1);
 
         Mockito.doReturn(storageEntity).when(mockStorageRepository).save(storageEntityNullId);
 
@@ -57,13 +57,13 @@ public class StorageServiceTests {
     @Test
     @DisplayName("Return a list of storages")
     void getAll_FullRepository() {
-        var storageDto1 = StorageData.storageDto1(id1);
-        var storageDto2 = StorageData.storageDto2(id2);
+        var storageDto1 = StorageData.storageDto100(id1);
+        var storageDto2 = StorageData.storageDto10(id2);
         var storageDtoList = new ArrayList<StorageDto>();
         storageDtoList.add(storageDto1);
         storageDtoList.add(storageDto2);
-        var storageEntity1 = StorageData.storageEntity1(id1);
-        var storageEntity2 = StorageData.storageEntity2(id2);
+        var storageEntity1 = StorageData.storageEntity100(id1);
+        var storageEntity2 = StorageData.storageEntity10(id2);
         var storageEntityList = new ArrayList<StorageEntity>();
         storageEntityList.add(storageEntity2);
         storageEntityList.add(storageEntity1);
@@ -93,9 +93,9 @@ public class StorageServiceTests {
     @Test
     @DisplayName("Return a storage")
     void getStorage_ReturnStorage() {
-        var storageDto = StorageData.storageDto1(id1);
+        var storageDto = StorageData.storageDto100(id1);
 
-        Mockito.doReturn(Optional.of(StorageData.storageEntity1(id1))).when(mockStorageRepository).findById(id1);
+        Mockito.doReturn(Optional.of(StorageData.storageEntity100(id1))).when(mockStorageRepository).findById(id1);
 
         var actual = storageService.get(id1);
         Assertions.assertThat(actual)

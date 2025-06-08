@@ -7,75 +7,47 @@ import org.example.pivo.utils.FileReaderUtility;
 
 public class StoreData {
 
-    public static StoreEntity storeEntity1(String id) {
-        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity1.json", StoreEntity.class);
+    public static StoreEntity storeEntityLenigradskoe(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntityLenigradskoe.json", StoreEntity.class);
         entity.setId(id);
         return entity;
     }
 
-    public static StoreEntity storeEntity2(String id) {
-        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity2.json", StoreEntity.class);
+    public static StoreEntity storeEntityProstornaya(String id) {
+        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntityProstornaya.json", StoreEntity.class);
         entity.setId(id);
         return entity;
     }
 
-    public static StoreEntity storeEntity3(String id) {
-        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity3.json", StoreEntity.class);
-        entity.setId(id);
-        return entity;
+    public static StoreEntity storeEntityLenigradskoe() {
+        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntityLenigradskoe.json", StoreEntity.class);
     }
 
-    public static StoreEntity storeEntity4(String id) {
-        var entity = FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity4.json", StoreEntity.class);
-        entity.setId(id);
-        return entity;
+    public static StoreEntity storeEntityProstornaya() {
+        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntityProstornaya.json", StoreEntity.class);
     }
 
-    public static StoreEntity storeEntity1() {
-        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity1.json", StoreEntity.class);
+    public static StoreEntity storeEntityLetnaya() {
+        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntityLetnaya.json", StoreEntity.class);
     }
 
-    public static StoreEntity storeEntity2() {
-        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity2.json", StoreEntity.class);
+    public static StoreEntity storeEntityDzerzhinskogo() {
+        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntityDzerzhinskogo.json", StoreEntity.class);
     }
 
-    public static StoreEntity storeEntity3() {
-        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity3.json", StoreEntity.class);
-    }
-
-    public static StoreEntity storeEntity4() {
-        return FileReaderUtility.readFile("/controllerFiles/store/entity/storeEntity4.json", StoreEntity.class);
-    }
-
-    public static StoreDto storeDto1(String id) {
-        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDto1.json", StoreDto.class);
+    public static StoreDto storeDtoLeningradskoe(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDtoLeningradskoe.json", StoreDto.class);
         dto.setId(id);
         return dto;
     }
 
-    public static StoreDto storeDto2(String id) {
-        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDto2.json", StoreDto.class);
+    public static StoreDto storeDtoProstornaya(String id) {
+        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDtoProstornaya.json", StoreDto.class);
         dto.setId(id);
         return dto;
     }
 
-    public static StoreDto storeDto3(String id) {
-        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDto3.json", StoreDto.class);
-        dto.setId(id);
-        return dto;
-    }
-
-    public static StoreDto storeDto4(String id) {
-        var dto = FileReaderUtility.readFile("/controllerFiles/store/dto/storeDto4.json", StoreDto.class);
-        dto.setId(id);
-        return dto;
-    }
-
-    public static CreateStoreDto createStoreDto1() {
-        return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDto1.json", CreateStoreDto.class);
-    }
-
-    public static CreateStoreDto createStoreDto2() {
-        return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDto2.json", CreateStoreDto.class);
+    public static CreateStoreDto createStoreDtoLeningradskoe() {
+        return FileReaderUtility.readFile("/controllerFiles/createStore/createStoreDtoLeningradskoe.json", CreateStoreDto.class);
     }
 }

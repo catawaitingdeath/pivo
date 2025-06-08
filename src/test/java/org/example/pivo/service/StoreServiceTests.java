@@ -51,10 +51,10 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Create a store")
     void createStore() {
-        var storeEntity = StoreData.storeEntity1(id1);
-        var storeEntityNullId = StoreData.storeEntity1();
-        var createStoreDto = StoreData.createStoreDto1();
-        var storeDto = StoreData.storeDto1(id1);
+        var storeEntity = StoreData.storeEntityLenigradskoe(id1);
+        var storeEntityNullId = StoreData.storeEntityLenigradskoe();
+        var createStoreDto = StoreData.createStoreDtoLeningradskoe();
+        var storeDto = StoreData.storeDtoLeningradskoe(id1);
 
         Mockito.doReturn(storeEntity).when(mockStoreRepository).save(storeEntityNullId);
 
@@ -68,13 +68,13 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Return a list of stores")
     void getAll_FullRepository() {
-        var storeDto1 = StoreData.storeDto1(id1);
-        var storeDto2 = StoreData.storeDto2(id2);
+        var storeDto1 = StoreData.storeDtoLeningradskoe(id1);
+        var storeDto2 = StoreData.storeDtoProstornaya(id2);
         List<StoreDto> storeDtoList = new ArrayList<>();
         storeDtoList.add(storeDto1);
         storeDtoList.add(storeDto2);
-        var storeEntity1 = StoreData.storeEntity1(id1);
-        var storeEntity2 = StoreData.storeEntity2(id2);
+        var storeEntity1 = StoreData.storeEntityLenigradskoe(id1);
+        var storeEntity2 = StoreData.storeEntityProstornaya(id2);
         List<StoreEntity> storeEntityList = new ArrayList<>();
         storeEntityList.add(storeEntity2);
         storeEntityList.add(storeEntity1);
@@ -106,9 +106,9 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Return a store")
     void getStore_ReturnStore() {
-        var storeDto = StoreData.storeDto1(id1);
+        var storeDto = StoreData.storeDtoLeningradskoe(id1);
 
-        Mockito.doReturn(Optional.of(StoreData.storeEntity1(id1))).when(mockStoreRepository).findById(id1);
+        Mockito.doReturn(Optional.of(StoreData.storeEntityLenigradskoe(id1))).when(mockStoreRepository).findById(id1);
 
         var actual = storeService.get(id1);
         Assertions.assertThat(actual)
@@ -129,7 +129,7 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Delete a store and its employees")
     void deleteStore_WithEmployees() {
-        var storeEntity = StoreData.storeEntity1(id1);
+        var storeEntity = StoreData.storeEntityLenigradskoe(id1);
 
         var employee1 = EmployeeDto.builder()
                 .name("Alice")
@@ -166,7 +166,7 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Delete a store without employees")
     void deleteStore_WithoutEmployees() {
-        var storeEntity = StoreData.storeEntity1(id1);
+        var storeEntity = StoreData.storeEntityLenigradskoe(id1);
 
         var storeEmployees = StoreEmployeeDto.builder()
                 .id(id1)
@@ -194,7 +194,7 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Return error: Список сотрудников не может быть null")
     void deleteStore_NullEmployees() {
-        var storeEntity = StoreData.storeEntity1(id1);
+        var storeEntity = StoreData.storeEntityLenigradskoe(id1);
 
         var storeEmployees = StoreEmployeeDto.builder()
                 .id(id1)
@@ -211,7 +211,7 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Return a store and its employees info")
     void getStoreEmployeeInfo_ReturnStoreEmployeeInfo() {
-        var store = StoreData.storeDto1(id1);
+        var store = StoreData.storeDtoLeningradskoe(id1);
 
         var employee1 = EmployeeDto.builder()
                 .name("Alice")
@@ -244,7 +244,7 @@ public class StoreServiceTests {
                 .phone(store.getPhone())
                 .build();
 
-        Mockito.doReturn(Optional.of(StoreData.storeEntity1(id1))).when(mockStoreRepository).findById(id1);
+        Mockito.doReturn(Optional.of(StoreData.storeEntityLenigradskoe(id1))).when(mockStoreRepository).findById(id1);
         Mockito.doReturn(storeEmployees).when(mockEmployeeClient).getEmployees(id1);
 
         var actual = storeService.getStoreEmployeeInfo(id1);
@@ -261,23 +261,6 @@ public class StoreServiceTests {
         var exception = assertThrows(NotFoundPivoException.class, () -> storeService.get(id1));
         Assertions.assertThat(exception.getMessage())
                 .isEqualTo("Предоставлен неверный id");
-    }
-
-    @Test
-    @DisplayName("Return error: Список сотрудников не может быть null")
-    void getStoreEmployeeInfo_NullEmployees() {
-        var storeEntity = StoreData.storeEntity1(id1);
-
-        var storeEmployees = StoreEmployeeDto.builder()
-                .id(id1)
-                .build();
-
-        Mockito.doReturn(Optional.of(storeEntity)).when(mockStoreRepository).findById(id1);
-        Mockito.doReturn(storeEmployees).when(mockEmployeeClient).getEmployees(id1);
-
-        var exception = assertThrows(InternalErrorPivoException.class, () -> storeService.getStoreEmployeeInfo(id1));
-        Assertions.assertThat(exception.getMessage())
-                .isEqualTo("Список сотрудников не может быть null");
     }
 
     @Test
@@ -307,7 +290,7 @@ public class StoreServiceTests {
                 .employees(List.of(employeeMapper.toDto(employee1), employeeMapper.toDto(employee2)))
                 .build();
 
-        Mockito.doReturn(Optional.of(StoreData.storeEntity1(id1))).when(mockStoreRepository).findById(id1);
+        Mockito.doReturn(Optional.of(StoreData.storeEntityLenigradskoe(id1))).when(mockStoreRepository).findById(id1);
         Mockito.doReturn(storeEmployees).when(mockEmployeeClient).getEmployees(id1);
 
         var actual = storeService.registerEmployees(id1, List.of(employee1, employee2));
@@ -329,7 +312,7 @@ public class StoreServiceTests {
     @Test
     @DisplayName("Return error: Список сотрудников не может быть пустым")
     void registerEmployees_EmptyEmployees() {
-        var storeEntity = StoreData.storeEntity1(id1);
+        var storeEntity = StoreData.storeEntityLenigradskoe(id1);
 
         Mockito.doReturn(Optional.of(storeEntity)).when(mockStoreRepository).findById(id1);
 

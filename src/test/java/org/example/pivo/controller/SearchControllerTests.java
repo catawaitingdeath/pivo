@@ -96,10 +96,10 @@ public class SearchControllerTests {
     void searchInStockTest() throws Exception {
         var beerEntityLager = BeerData.beerEntityLager();
         var beerId = beerRepository.save(beerEntityLager).getId();
-        var storeId1 = storeRepository.save(StoreData.storeEntity1()).getId();
-        var storeId2 = storeRepository.save(StoreData.storeEntity2()).getId();
-        var storeId3 = storeRepository.save(StoreData.storeEntity3()).getId();
-        var storeId4 = storeRepository.save(StoreData.storeEntity4()).getId();
+        var storeId1 = storeRepository.save(StoreData.storeEntityLenigradskoe()).getId();
+        var storeId2 = storeRepository.save(StoreData.storeEntityProstornaya()).getId();
+        var storeId3 = storeRepository.save(StoreData.storeEntityLetnaya()).getId();
+        var storeId4 = storeRepository.save(StoreData.storeEntityDzerzhinskogo()).getId();
         var storageEntity1 = StorageEntity.builder()
                 .beer(beerId)
                 .store(storeId1)
@@ -145,9 +145,9 @@ public class SearchControllerTests {
         var beerId2 = beerRepository.save(beerEntity2).getId();
         var beerId3 = beerRepository.save(beerEntity3).getId();
         var beerIds = List.of(beerId1, beerId2, beerId3);
-        var storeEntity1 = StoreData.storeEntity1();
-        var storeEntity2 = StoreData.storeEntity2();
-        var storeEntity3 = StoreData.storeEntity3();
+        var storeEntity1 = StoreData.storeEntityLenigradskoe();
+        var storeEntity2 = StoreData.storeEntityProstornaya();
+        var storeEntity3 = StoreData.storeEntityLetnaya();
         String storeId1 = storeRepository.save(storeEntity1).getId();
         String storeId2 = storeRepository.save(storeEntity2).getId();
         String storeId3 = storeRepository.save(storeEntity3).getId();
@@ -211,7 +211,7 @@ public class SearchControllerTests {
         beerRepository.save(beerEntity1);
         beerRepository.save(beerEntity2);
         beerRepository.save(beerEntity3);
-        var storeEntity = StoreData.storeEntity1();
+        var storeEntity = StoreData.storeEntityLenigradskoe();
         String storeId = storeRepository.save(storeEntity).getId();
         var storageEntity1 = StorageEntity.builder()
                 .beer(beerEntity1.getId())

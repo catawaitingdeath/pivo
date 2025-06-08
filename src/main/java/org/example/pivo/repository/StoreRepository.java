@@ -1,6 +1,7 @@
 package org.example.pivo.repository;
 
 import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.BeerInStockDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StoreEntity;
 import org.springframework.data.domain.Page;
@@ -25,10 +26,10 @@ public interface StoreRepository extends CrudRepository<StoreEntity, String> {
             """,
             nativeQuery = true
     )
-    List<StoreEntity> findStoresByBeerFromStorage(String beerId);
+    Page<StoreEntity> findStoresByBeerFromStorage(String beerId, Pageable pageable);
 
     @Query(value = """
-    SELECT b.*
+    SELECT b.*, s.count AS quantity
     FROM beer b
     JOIN storage s ON b.id = s.beer
     WHERE s.store = :storeId AND s.count > 0
@@ -40,11 +41,10 @@ public interface StoreRepository extends CrudRepository<StoreEntity, String> {
     WHERE s.store = :storeId AND s.count > 0
     """,
             nativeQuery = true)
-    Page<BeerEntity> findBeersByStoreId(
+    Page<BeerInStockDto> findBeersByStoreId(
             @Param("storeId")
             String storeId,
             Pageable pageable
     );
-
     Page<StoreEntity> findStoresByIdIn(List<String> ids, Pageable pageable);
 }

@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -57,10 +58,7 @@ public class StoreService {
         storeRepository.findById(id)
                 .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
         var employees = employeeClient.getEmployees(id);
-        if(employees.getEmployees() == null){
-            throw new InternalErrorPivoException("Список сотрудников не может быть null");
-        }
-        if (!employees.getEmployees().isEmpty()) {
+        if (employees.getEmployees() != null && !employees.getEmployees().isEmpty()) {
             employeeClient.deleteEmployees(id);
         }
         try {
@@ -80,7 +78,7 @@ public class StoreService {
                 .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
         var employees = employeeClient.getEmployees(id).getEmployees();
         if(employees == null){
-            throw new InternalErrorPivoException("Список сотрудников не может быть null");
+            employees = Collections.emptyList();
         }
         return StoreEmployeeInfoDto.builder()
                 .id(store.getId())
@@ -93,7 +91,7 @@ public class StoreService {
     public StoreEmployeeDto registerEmployees(String id, List<CreateEmployeeDto> employees) {
         storeRepository.findById(id)
                 .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
-        if(employees.isEmpty()){
+        if(employees == null || employees.isEmpty()){
             throw new NotFoundPivoException("Список сотрудников не может быть пустым");
         }
         for(CreateEmployeeDto employee : employees) {

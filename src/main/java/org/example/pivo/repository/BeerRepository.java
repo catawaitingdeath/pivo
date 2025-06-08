@@ -13,11 +13,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface BeerRepository extends CrudRepository<BeerEntity, String>, JpaSpecificationExecutor<BeerEntity> {
+public interface BeerRepository extends JpaRepository<BeerEntity, String>, JpaSpecificationExecutor<BeerEntity> {
 
     List<BeerEntity> findAll();
 
-    List<BeerEntity> findAll(Specification<BeerEntity> spec);
+    Page<BeerEntity> findAll(Specification<BeerEntity> spec, Pageable pageable);
 
     BeerEntity findByName(String name);
 
