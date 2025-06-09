@@ -1,7 +1,9 @@
 package org.example.pivo.mapper;
 
+import org.example.pivo.model.dto.BeerInStockDto;
 import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
+import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StoreEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

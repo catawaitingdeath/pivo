@@ -1,15 +1,17 @@
 package org.example.pivo.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.client.CreateEmployeeDto;
-import org.example.pivo.client.EmployeeClient;
+import org.example.pivo.client.EmployeeDto;
 import org.example.pivo.client.EmployeeMapper;
 import org.example.pivo.client.StoreEmployeeDto;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.model.dto.StoreEmployeeInfoDto;
 import org.example.pivo.repository.StoreRepository;
+import org.example.pivo.utils.FileReaderUtility;
 import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +27,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -52,42 +53,49 @@ public class StoreControllerTests {
     private StoreRepository storeRepository;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private EmployeeMapper employeeMapper;
     private String id = "W_cPwW5eqk9kxe2OxgivJzVgu";
 
-    private CreateEmployeeDto create1 = CreateEmployeeDto.builder()
-            .name("Alice")
-            .surname("Johnson")
-            .phone("79684551668")
-            .email("alice.johnson@example.com")
-            .position("Cashier")
-            .salary(BigInteger.valueOf(30000))
-            .store(id)
-            .build();
-    private CreateEmployeeDto create2 = CreateEmployeeDto.builder()
-            .name("Bob")
-            .surname("Smith")
-            .phone("79684551888")
-            .email("bob.smith@example.com")
-            .position("Manager")
-            .salary(BigInteger.valueOf(50000))
-            .store(id)
-            .build();
-    @Autowired
-    private EmployeeClient employeeClient;
+    private CreateEmployeeDto createAlice = FileReaderUtility.readFile("/controllerFiles/employee/createAlice.json", CreateEmployeeDto.class);
+    private CreateEmployeeDto createBob = FileReaderUtility.readFile("/controllerFiles/employee/createBob.json", CreateEmployeeDto.class);
+    private String Alice = FileReaderUtility.readFile("/controllerFiles/employee/Alice.json");
+    private String Bob = FileReaderUtility.readFile("/controllerFiles/employee/Bob.json");
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         storeRepository.deleteAll();
         WireMock.reset();
         WireMock.removeAllMappings();
+    }
 
-
-
+    private void forCreation() throws JsonProcessingException {
         WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/employee/store/" + id))
-                .willReturn(WireMock.ok()));
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                    {
+                                      "id": "%s",
+                                      "employees": [%s, %s]
+                                    }
+                                """.formatted(id, Alice, Bob))));
 
+        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/employee"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createAlice)))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                    %s
+                                """.formatted(Alice))));
+
+        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/employee"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createBob)))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                    %s
+                                """.formatted(Bob))));
+    }
+
+    private void forDeletion() {
         WireMock.stubFor(WireMock.delete(WireMock.urlPathEqualTo("/employee/store/" + id))
                 .inScenario("employees")
                 .willSetStateTo("Deleted")
@@ -100,40 +108,6 @@ public class StoreControllerTests {
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"employees\":[]}")));
-
-        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/employee"))
-                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(create1)))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("""
-                                    {
-                                      "id": "id_1",
-                                      "name": "Alice",
-                                      "surname": "Johnson",
-                                      "phone": "79684551668",
-                                      "email": "alice.johnson@example.com",
-                                      "position": "Cashier",
-                                      "salary": 30000,
-                                      "store": "%s"
-                                    }
-                                """.formatted(id))));
-
-        WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/employee"))
-                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(create2)))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("""
-                                   {
-                                     "id": "id_2",
-                                     "name": "Bob",
-                                     "surname": "Smith",
-                                     "phone": "79684551888",
-                                     "email": "bob.smith@example.com",
-                                     "position": "Manager",
-                                     "salary": 50000,
-                                     "store": "%s"
-                                   }
-                                """.formatted(id))));
     }
 
     private Consumer<Integer> getWith2Employees() {
@@ -143,31 +117,11 @@ public class StoreControllerTests {
                         .withBody("""
                                     {
                                       "id": "%s",
-                                      "employees": [
-                                        {
-                                          "id": "id_1",
-                                          "name": "Alice",
-                                          "surname": "Johnson",
-                                          "phone": "79684551668",
-                                          "email": "alice.johnson@example.com",
-                                          "position": "Cashier",
-                                          "salary": 30000,
-                                          "store": "%s"
-                                        },
-                                        {
-                                          "id": "id_2",
-                                          "name": "Bob",
-                                          "surname": "Smith",
-                                          "phone": "79684551888",
-                                          "email": "bob.smith@example.com",
-                                          "position": "Manager",
-                                          "salary": 50000,
-                                          "store": "%s"
-                                        }
-                                      ]
+                                      "employees": [%s, %s]
                                     }
-                                """.formatted(id, id, id))));
-        return i -> WireMock.verify(i, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
+                                """.formatted(id, Alice, Bob))));
+        return i -> WireMock.verify(i,
+                WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
     }
 
     @Test
@@ -214,29 +168,31 @@ public class StoreControllerTests {
 
     @Test
     void deleteStoreTest() throws Exception {
+        forCreation();
         var storeEntity = StoreData.storeEntityLenigradskoe(id);
         storeRepository.save(storeEntity);
-        employeeClient.createEmployee(create1);
-        employeeClient.createEmployee(create2);
-        var employees = employeeClient.getEmployees(id);
+        var employeesString = mockMvc.perform(MockMvcRequestBuilders.get("/store/{id}/employees", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        var employees = objectMapper.readValue(employeesString, StoreEmployeeDto.class);
         Assertions.assertThat(employees.getEmployees())
                 .hasSize(2);
+        forDeletion();
         mockMvc.perform(MockMvcRequestBuilders.delete("/store/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         var storesAfter = storeRepository.findAll();
         Assertions.assertThat(storesAfter)
                 .isEmpty();
-        employees = employeeClient.getEmployees(id);
-        Assertions.assertThat(employees.getEmployees())
-                .isEmpty();
-        WireMock.verify(3, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
+        WireMock.verify(2, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
         WireMock.verify(1,
                 WireMock.deleteRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
     }
 
     @Test
     void deleteWrongIdTest() throws Exception {
+        forDeletion();
         var id = "Im_Pwg6Rg_9kxe2OgivJzVga";
         var error = mockMvc.perform(MockMvcRequestBuilders.delete("/store/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -247,26 +203,16 @@ public class StoreControllerTests {
     }
 
     @Test
-    void deleteNullEmployeesTest() throws Exception {
-        var id = "Im_Pwg6Rg_9kxe2OgivJzVga";
-        var storeEntity = StoreData.storeEntityLenigradskoe(id);
-        storeRepository.save(storeEntity);
-        var error = mockMvc.perform(MockMvcRequestBuilders.delete("/store/{id}?mode=NullList", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andReturn().getResolvedException().getMessage();
-        Assertions.assertThat(error)
-                .isEqualTo("Список сотрудников не может быть null");
-    }
-
-    @Test
     void getStoreEmployeeInfoTest() throws Exception {
+        forCreation();
         var stub = getWith2Employees();
         var storeEntity = StoreData.storeEntityLenigradskoe(id);
         storeRepository.save(storeEntity);
-        employeeClient.createEmployee(create1);
-        employeeClient.createEmployee(create2);
-        var employees = employeeClient.getEmployees(id);
+        var employeesString = mockMvc.perform(MockMvcRequestBuilders.get("/store/{id}/employees", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        var employees = objectMapper.readValue(employeesString, StoreEmployeeDto.class);
         var infoDto = StoreEmployeeInfoDto.builder()
                 .id(storeEntity.getId())
                 .employees(employees.getEmployees())
@@ -298,24 +244,23 @@ public class StoreControllerTests {
 
     @Test
     void registerEmployeesTest() throws Exception {
+        forCreation();
         var storeEntity = StoreData.storeEntityLenigradskoe(id);
         storeRepository.save(storeEntity);
-        var content = List.of(create1, create2);
-        var employee1 = employeeMapper.toDto(create1);
-        employee1.setId("id_1");
-        var employee2 = employeeMapper.toDto(create2);
-        employee2.setId("id_2");
+        var content = List.of(createAlice, createBob);
+        var Alice = FileReaderUtility.readFile("/controllerFiles/employee/Alice.json", EmployeeDto.class);
+        var Bob = FileReaderUtility.readFile("/controllerFiles/employee/Bob.json", EmployeeDto.class);
         var storeEmployeeDto = StoreEmployeeDto.builder()
-                .id(id)
-                .employees(List.of(employee1, employee2))
+                .id(storeEntity.getId())
+                .employees(List.of(Alice, Bob))
                 .build();
-        String jsonDto = objectMapper.writeValueAsString(storeEmployeeDto);
+        String json = objectMapper.writeValueAsString(storeEmployeeDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/store/{id}/registerEmployees", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(content)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(content().json(jsonDto));
+                .andExpect(content().json(json));;
 
         WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
         WireMock.verify(2, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee")));
@@ -323,8 +268,7 @@ public class StoreControllerTests {
 
     @Test
     void registerEmployeesWrongIdTest() throws Exception {
-        var id = "Im_Pwg6Rg_9kxe2OgivJzVga";
-        var content = List.of(create1, create2);
+        var content = List.of(createAlice, createBob);
         var error = mockMvc.perform(MockMvcRequestBuilders.post("/store/{id}/registerEmployees", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(content)))

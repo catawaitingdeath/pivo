@@ -5,6 +5,7 @@ import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.BeerInStockDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.TypeEntity;
@@ -126,16 +127,20 @@ public class SearchService {
     public Page<Map<String, Object>> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         var beers = storeRepository.findBeersByStoreId(storeId, pageable);
-        if (beers == null) {
+        if (beers == null || beers.isEmpty()) {
             throw new NotFoundPivoException("Пиво в указанном магазине не было найдено");
         }
         return beers.map(beerInStock -> {
-            BeerDto beerDto = beerInStock.getBeerDto();
-            BigInteger quantity = beerInStock.getCount();
+            var typeId = beerInStock.getType();
+            var typeEntity = typeRepository.findById(typeId);
+            var beerDto = beerMapper.toDto(beerInStock, typeEntity.get());
+            var count = storageRepository.findByBeerAndStore(beerDto.getId(), storeId).getCount();
+
+            BeerInStockDto dto = new BeerInStockDto(beerDto, count);
 
             Map<String, Object> result = new HashMap<>();
-            result.put("beer", beerDto);
-            result.put("quantity", quantity);
+            result.put("beer", dto.getBeerDto());
+            result.put("quantity", dto.getCount());
 
             return result;
         });

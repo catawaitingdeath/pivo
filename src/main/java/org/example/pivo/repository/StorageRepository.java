@@ -22,6 +22,8 @@ public interface StorageRepository extends CrudRepository<StorageEntity, String>
 
     List<StorageEntity> findAllByStore (String storeId);
 
+    StorageEntity findByBeerAndStore(String beerId, String storeId);
+
     @Query("""
     SELECT s.store
     FROM StorageEntity s
@@ -31,4 +33,6 @@ public interface StorageRepository extends CrudRepository<StorageEntity, String>
     List<String> findStoreIdsWithAllBeers(
             @Param("beerIds")
             List<String> beerIds);
+
+    String Beer(String beer);
 }

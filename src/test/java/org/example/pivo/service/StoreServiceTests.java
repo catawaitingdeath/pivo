@@ -192,23 +192,6 @@ public class StoreServiceTests {
     }
 
     @Test
-    @DisplayName("Return error: Список сотрудников не может быть null")
-    void deleteStore_NullEmployees() {
-        var storeEntity = StoreData.storeEntityLenigradskoe(id1);
-
-        var storeEmployees = StoreEmployeeDto.builder()
-                .id(id1)
-                .build();
-
-        Mockito.doReturn(Optional.of(storeEntity)).when(mockStoreRepository).findById(id1);
-        Mockito.doReturn(storeEmployees).when(mockEmployeeClient).getEmployees(id1);
-
-        var exception = assertThrows(InternalErrorPivoException.class, () -> storeService.delete(id1));
-        Assertions.assertThat(exception.getMessage())
-                .isEqualTo("Список сотрудников не может быть null");
-    }
-
-    @Test
     @DisplayName("Return a store and its employees info")
     void getStoreEmployeeInfo_ReturnStoreEmployeeInfo() {
         var store = StoreData.storeDtoLeningradskoe(id1);

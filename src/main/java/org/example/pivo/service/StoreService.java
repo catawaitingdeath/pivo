@@ -58,7 +58,7 @@ public class StoreService {
         storeRepository.findById(id)
                 .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
         var employees = employeeClient.getEmployees(id);
-        if (employees.getEmployees() != null && !employees.getEmployees().isEmpty()) {
+        if (employees != null && !employees.getEmployees().isEmpty()) {
             employeeClient.deleteEmployees(id);
         }
         try {
@@ -98,6 +98,6 @@ public class StoreService {
             employee.setStore(id);
             employeeClient.createEmployee(employee);
         }
-        return employeeClient.getEmployees(id);
+        return employeeMapper.toStoreEmployeeDto(id, employeeClient.getEmployees(id).getEmployees());
     }
 }
