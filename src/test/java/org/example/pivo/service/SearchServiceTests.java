@@ -6,7 +6,12 @@ import org.example.pivo.constants.BeerIds;
 import org.example.pivo.constants.StoreIds;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.mapper.StoreMapper;
+import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
+import org.example.pivo.model.entity.StorageEntity;
+import org.example.pivo.model.entity.StoreEntity;
+import org.example.pivo.model.entity.TypeEntity;
 import org.example.pivo.model.exceptions.BadRequestPivoException;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
@@ -29,6 +34,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -45,6 +51,19 @@ public class SearchServiceTests {
     private BeerSpecification mockBeerSpecification;
     private Integer pageNumber = 0;
     private Integer pageSize = 10;
+    private StorageEntity storageEntity = StorageData.storageEntity100();
+    private BeerEntity beerEntityLager = BeerData.beerEntityLager(BeerIds.beerId1);
+    private BeerEntity beerEntityAle = BeerData.beerEntityAle(BeerIds.beerId2);
+    private BeerDto beerDtoLager = BeerData.beerDtoLager(BeerIds.beerId1);
+    private BeerDto beerDtoAle = BeerData.beerDtoAle(BeerIds.beerId2);
+    private TypeEntity typeEntityLager = TypeData.typeEntityLager(BigInteger.valueOf(2));
+    private TypeEntity typeEntityAle = TypeData.typeEntityAle(BigInteger.valueOf(1));
+    private StoreDto storeDto1 = StoreData.storeDtoLeningradskoe(StoreIds.storeId1);
+    private StoreDto storeDto2 = StoreData.storeDtoProstornaya(StoreIds.storeId2);
+    private StoreEntity storeEntity1 = StoreData.storeEntityLenigradskoe(StoreIds.storeId1);
+    private StoreEntity storeEntity2 = StoreData.storeEntityProstornaya(StoreIds.storeId2);
+    private List<String> beerIds = List.of(BeerIds.beerId1, BeerIds.beerId2, BeerIds.beerId3);
+    private List<String> storeIds = List.of(StoreIds.storeId1, StoreIds.storeId2);
 
 
     @BeforeEach
@@ -135,30 +154,25 @@ public class SearchServiceTests {
     @Test
     @DisplayName("Return a page with one StoreDto")
     void searchInStockTest_Success() {
-        var storageEntity = StorageData.storageEntity1();
         storageEntity.setBeer(BeerIds.beerId1);
         storageEntity.setStore(StoreIds.storeId1);
-        var beerEntity = BeerData.beerEntityLager(BeerIds.beerId1);
-        var storeEntity = StoreData.storeEntity1(StoreIds.storeId1);
-        var storeDto = StoreData.storeDto1(StoreIds.storeId1);
 
         Mockito.doReturn(true).when(mockBeerRepository).existsById(BeerIds.beerId1);
-        Mockito.doReturn(List.of(storeEntity))
+        Mockito.doReturn(new PageImpl<>(List.of(storeEntity1), PageRequest.of(pageNumber, pageSize), 1))
                 .when(mockStoreRepository)
-                .findStoresByBeerFromStorage(beerEntity.getId());
+                .findStoresByBeerFromStorage(beerEntityLager.getId(), PageRequest.of(pageNumber, pageSize));
 
         var actual = searchService.searchInStock(BeerIds.beerId1, pageNumber, pageSize);
         Assertions.assertThat(actual.getContent())
                 .isNotNull()
-                .isEqualTo(List.of(storeDto));
+                .isEqualTo(List.of(storeDto1));
     }
 
     @Test
     @DisplayName("Return an empty page")
     void searchInStockTest_NoStores() {
-
         Mockito.doReturn(true).when(mockBeerRepository).existsById(BeerIds.beerId1);
-        Mockito.doReturn(List.of()).when(mockStoreRepository).findStoresByBeerFromStorage(BeerIds.beerId1);
+        Mockito.doReturn(Page.empty()).when(mockStoreRepository).findStoresByBeerFromStorage(BeerIds.beerId1, PageRequest.of(pageNumber, pageSize));
 
         var actual = searchService.searchInStock(BeerIds.beerId1, pageNumber, pageSize);
         Assertions.assertThat(actual).isEmpty();
@@ -177,12 +191,6 @@ public class SearchServiceTests {
     @Test
     @DisplayName("Return a page of two storeDtos")
     void searchForStoresTest_Success() {
-        var storeEntity1 = StoreData.storeEntity1(StoreIds.storeId1);
-        var storeEntity2 = StoreData.storeEntity2(StoreIds.storeId2);
-        var storeDto1 = StoreData.storeDto1(StoreIds.storeId1);
-        var storeDto2 = StoreData.storeDto2(StoreIds.storeId2);
-        var beerIds = List.of(BeerIds.beerId1, BeerIds.beerId2, BeerIds.beerId3);
-        var storeIds = List.of(StoreIds.storeId1, StoreIds.storeId2);
         var page = new PageImpl<>(List.of(storeEntity1, storeEntity2), PageRequest.of(pageNumber, pageSize), 2);
 
         Mockito.doReturn(storeIds)
@@ -213,27 +221,44 @@ public class SearchServiceTests {
     }
 
     @Test
-    @DisplayName("Return result")
+    @DisplayName("Return beer from a certain store")
     void searchForBeerTest_Success() {
-        var beerEntity1 = BeerData.beerEntityLager(BeerIds.beerId1);
-        var beerEntity2 = BeerData.beerEntityAle(BeerIds.beerId2);
-        var beerDtoLager = BeerData.beerDtoLager(BeerIds.beerId1);
-        var beerDtoAle = BeerData.beerDtoAle(BeerIds.beerId2);
-        var typeEntityLager = TypeData.typeEntityLager(BigInteger.valueOf(2));
-        var typeEntityAle = TypeData.typeEntityAle(BigInteger.valueOf(1));
-        var page = new PageImpl<>(List.of(beerEntity1, beerEntity2), PageRequest.of(pageNumber, pageSize), 2);
+        var storageEntityLager = StorageEntity.builder()
+                .beer(BeerIds.beerId1)
+                .store(StoreIds.storeId1)
+                .count(BigInteger.TEN)
+                .build();
+        var storageEntityAle = StorageEntity.builder()
+                .beer(BeerIds.beerId2)
+                .store(StoreIds.storeId1)
+                .count(BigInteger.valueOf(100))
+                .build();
+        var page = new PageImpl<>(List.of(beerEntityLager, beerEntityAle), PageRequest.of(pageNumber, pageSize), 2);
 
-        Mockito.doReturn(List.of(typeEntityLager, typeEntityAle))
+        Mockito.doReturn(Optional.of(typeEntityLager))
                 .when(mockTypeRepository)
-                .findByIdIn(Set.of(BigInteger.valueOf(2), BigInteger.valueOf(1)));
+                .findById(beerEntityLager.getType());
+        Mockito.doReturn(Optional.of(typeEntityAle))
+                .when(mockTypeRepository)
+                .findById(beerEntityAle.getType());
         Mockito.doReturn(page)
                 .when(mockStoreRepository)
                 .findBeersByStoreId(StoreIds.storeId1, PageRequest.of(pageNumber, pageSize));
+        Mockito.doReturn(storageEntityLager)
+                .when(mockStorageRepository)
+                .findByBeerAndStore(BeerIds.beerId1, StoreIds.storeId1);
+        Mockito.doReturn(storageEntityAle)
+                .when(mockStorageRepository)
+                .findByBeerAndStore(BeerIds.beerId2, StoreIds.storeId1);
 
         var actual = searchService.searchForBeer(StoreIds.storeId1, pageNumber, pageSize);
         Assertions.assertThat(actual.getContent())
                 .isNotNull()
-                .containsExactlyInAnyOrderElementsOf(List.of(beerDtoLager, beerDtoAle));
+                .extracting(result -> result.get("beer"))
+                .containsExactlyInAnyOrder(beerDtoLager, beerDtoAle);
+        Assertions.assertThat(actual.getContent())
+                .extracting(result -> result.get("quantity"))
+                .containsExactlyInAnyOrder(BigInteger.TEN, BigInteger.valueOf(100));
     }
 
     @Test

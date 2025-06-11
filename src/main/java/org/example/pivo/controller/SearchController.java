@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/beer/search")
@@ -110,7 +111,7 @@ public class SearchController {
 
     @Operation(summary = "Поиск пива, которое есть в продаже в конкретном магазине")
     @GetMapping("/certain-store")
-    public Page<BeerDto> searchForBeers(
+    public Page<Map<String, Object>> searchForBeers(
             @NotBlank
             @RequestParam(required = false)
             @Parameter(description = "Id конкретного магазина", example = "W_cPwW5eqk9kxe2OxgivJzVgu")

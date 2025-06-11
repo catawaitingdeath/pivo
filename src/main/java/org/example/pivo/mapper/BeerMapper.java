@@ -1,6 +1,7 @@
 package org.example.pivo.mapper;
 
 import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.BeerInStockDto;
 import org.example.pivo.model.dto.CreateBeerDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.TypeEntity;

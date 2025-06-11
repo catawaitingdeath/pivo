@@ -7,13 +7,11 @@ import org.example.pivo.model.dto.BeerShipmentDto;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
-import org.example.pivo.service.BeerService;
-import org.example.pivo.service.StorageService;
-import org.example.pivo.service.StoreService;
 import org.example.pivo.utils.data.BeerData;
 import org.example.pivo.utils.data.StorageData;
 import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -61,13 +59,13 @@ public class StorageControllerTests {
         beerRepository.deleteAll();
         beerRepository.save(BeerData.beerEntityAle(beerId1));
         beerRepository.save(BeerData.beerEntityLager(beerId2));
-        storeRepository.save(StoreData.storeEntity1(storeId1));
-        storeRepository.save(StoreData.storeEntity2(storeId2));
+        storeRepository.save(StoreData.storeEntityLenigradskoe(storeId1));
+        storeRepository.save(StoreData.storeEntityProstornaya(storeId2));
     }
 
     @Test
     void createTest() throws Exception {
-        var content = StorageData.createStorageDto1(beerId1, storeId1);
+        var content = StorageData.createStorageDto100(beerId1, storeId1);
         var contentString = objectMapper.writeValueAsString(content);
         mockMvc.perform(MockMvcRequestBuilders.post("/storage")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,10 +78,10 @@ public class StorageControllerTests {
 
     @Test
     void getAllTest() throws Exception {
-        var storageEntity1 = StorageData.storageEntity1();
+        var storageEntity1 = StorageData.storageEntity100();
         storageEntity1.setBeer(beerId1);
         storageEntity1.setStore(storeId1);
-        var storageEntity2 = StorageData.storageEntity2();
+        var storageEntity2 = StorageData.storageEntity10();
         storageEntity2.setBeer(beerId2);
         storageEntity2.setStore(storeId2);
         storageRepository.save(storageEntity1);
@@ -99,8 +97,8 @@ public class StorageControllerTests {
 
     @Test
     void getStorageTest() throws Exception {
-        storageRepository.save(StorageData.storageEntity1(storageId1));
-        String jsonStorage = objectMapper.writeValueAsString(StorageData.storageDto1(storageId1));
+        storageRepository.save(StorageData.storageEntity100(storageId1));
+        String jsonStorage = objectMapper.writeValueAsString(StorageData.storageDto100(storageId1));
         mockMvc.perform(MockMvcRequestBuilders.get("/storage/{id}", storageId1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -117,7 +115,7 @@ public class StorageControllerTests {
                 .beerId(beerId2)
                 .count(BigInteger.TEN)
                 .build();
-        var store = StoreData.storeEntity1(storeId1);
+        var store = StoreData.storeEntityLenigradskoe(storeId1);
         var storeShipment = BeerShipmentDto.StoreShipment.builder()
                 .storeId(store.getId())
                 .position(List.of(position1, position2))
@@ -133,5 +131,40 @@ public class StorageControllerTests {
         var storage = storageRepository.findAll();
         Assertions.assertThat(storage)
                 .hasSize(2);
+    }
+
+    @Test
+    @DisplayName("Return error: Позиции пива не уникальны")
+    void shipmentNoUniqueIdsTest_ReturnError() throws Exception {
+        var position1 = BeerShipmentDto.Position.builder()
+                .beerId(beerId1)
+                .count(BigInteger.TEN)
+                .build();
+        var position2 = BeerShipmentDto.Position.builder()
+                .beerId(beerId1)
+                .count(BigInteger.TEN)
+                .build();
+        var position3 = BeerShipmentDto.Position.builder()
+                .beerId(beerId2)
+                .count(BigInteger.TEN)
+                .build();
+        var store = StoreData.storeEntityLenigradskoe(storeId1);
+        var storeShipment = BeerShipmentDto.StoreShipment.builder()
+                .storeId(store.getId())
+                .position(List.of(position1, position2, position3))
+                .build();
+        var beerShipmentDto = BeerShipmentDto.builder()
+                .storeShipments(List.of(storeShipment))
+                .build();
+        var contentString = objectMapper.writeValueAsString(beerShipmentDto);
+        var result = mockMvc.perform(MockMvcRequestBuilders.post("/storage/shipment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(contentString))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andReturn()
+                .getResolvedException()
+                .getMessage();
+        Assertions.assertThat(result)
+                .isEqualTo("Позиции пива не уникальны");
     }
 }

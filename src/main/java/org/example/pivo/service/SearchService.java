@@ -5,6 +5,7 @@ import org.example.pivo.components.BeerSpecification;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.BeerInStockDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.TypeEntity;
@@ -22,9 +23,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +67,7 @@ public class SearchService {
             throw new BadRequestPivoException("Критерии не были заданы");
         }
 
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Specification<BeerEntity> spec = Specification.where(null);
 
         if (producer != null) {
@@ -94,27 +98,18 @@ public class SearchService {
         var result = all.stream()
                 .map(b -> beerMapper.toDto(b, beerTypes.get(b.getType())))
                 .toList();
-        int fromIndex = pageNumber * pageSize;
-        int toIndex = Math.min(fromIndex + pageSize, result.size());
-        return new PageImpl<>(result.subList(fromIndex, toIndex), PageRequest.of(pageNumber, pageSize), result.size());
+        return new PageImpl<>(result, pageable, all.size());
     }
 
     public Page<StoreDto> searchInStock(String beerId, Integer pageNumber, Integer pageSize) {
         if (!beerRepository.existsById(beerId)) {
             throw new NotFoundPivoException("Не найдено пива с таким id");
         }
-        var stores = storeRepository.findStoresByBeerFromStorage(beerId);
+        var stores = storeRepository.findStoresByBeerFromStorage(beerId, PageRequest.of(pageNumber, pageSize));
         if (stores.isEmpty()) {
             return Page.empty();
         }
-        var storeDtos = stores.stream()
-                .map(storeMapper::toDto)
-                .toList();
-        int fromIndex = pageNumber * pageSize;
-        int toIndex = Math.min(fromIndex + pageSize, storeDtos.size());
-        return new PageImpl<>(storeDtos.subList(fromIndex, toIndex),
-                PageRequest.of(pageNumber, pageSize),
-                storeDtos.size());
+        return stores.map(storeMapper::toDto);
     }
 
     public Page<StoreDto> searchForStores(List<String> beers, Integer pageNumber, Integer pageSize) {
@@ -129,18 +124,25 @@ public class SearchService {
         return new PageImpl<>(stores, PageRequest.of(pageNumber, pageSize), storeEntities.getTotalElements());
     }
 
-    public Page<BeerDto> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
+    public Page<Map<String, Object>> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         var beers = storeRepository.findBeersByStoreId(storeId, pageable);
-        if (beers == null) {
+        if (beers == null || beers.isEmpty()) {
             throw new NotFoundPivoException("Пиво в указанном магазине не было найдено");
         }
-        var typeIds = beers.stream()
-                .map(BeerEntity::getType)
-                .collect(Collectors.toSet());
-        var beerTypes = typeRepository.findByIdIn(typeIds).stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(TypeEntity::getId, TypeEntity::getName));
-        return beers.map(b -> beerMapper.toDto(b, beerTypes.get(b.getType())));
+        return beers.map(beerInStock -> {
+            var typeId = beerInStock.getType();
+            var typeEntity = typeRepository.findById(typeId);
+            var beerDto = beerMapper.toDto(beerInStock, typeEntity.get());
+            var count = storageRepository.findByBeerAndStore(beerDto.getId(), storeId).getCount();
+
+            BeerInStockDto dto = new BeerInStockDto(beerDto, count);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("beer", dto.getBeerDto());
+            result.put("quantity", dto.getCount());
+
+            return result;
+        });
     }
 }

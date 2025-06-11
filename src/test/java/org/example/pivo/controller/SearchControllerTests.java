@@ -2,15 +2,12 @@ package org.example.pivo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
-import org.assertj.core.api.Assertions;
 import org.example.pivo.config.PostgresInitializer;
-import org.example.pivo.constants.BeerIds;
 import org.example.pivo.model.entity.StorageEntity;
 import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.repository.StorageRepository;
 import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.BeerData;
-import org.example.pivo.utils.data.StorageData;
 import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +24,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
@@ -48,17 +44,30 @@ public class SearchControllerTests {
 
     @BeforeEach
     public void setUp() {
+        storageRepository.deleteAll();
         storeRepository.deleteAll();
         beerRepository.deleteAll();
-        storageRepository.deleteAll();
+
     }
 
-    @Test
-    void searchByNameTest() throws Exception {
+    public void saveBeerEntities(){
         beerRepository.save(BeerData.beerEntityLager());
         beerRepository.save(BeerData.beerEntityAle());
         beerRepository.save(BeerData.beerEntityPorter());
         beerRepository.save(BeerData.beerEntityStout());
+    }
+
+    public StorageEntity storageEntityBuilder(String beer, String store){
+        return StorageEntity.builder()
+                .beer(beer)
+                .store(store)
+                .count(BigInteger.valueOf(10))
+                .build();
+    }
+
+    @Test
+    void searchByNameTest() throws Exception {
+        saveBeerEntities();
         mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/by-name")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("name", "игули")
@@ -71,14 +80,8 @@ public class SearchControllerTests {
 
     @Test
     void searchByCriteriaTest() throws Exception {
-        var beerEntityLager = BeerData.beerEntityLager();
         var beerEntityAle = BeerData.beerEntityAle();
-        var beerEntityStout = BeerData.beerEntityStout();
-        var beerEntityPorter = BeerData.beerEntityPorter();
-        beerRepository.save(beerEntityLager);
         var id = beerRepository.save(beerEntityAle).getId();
-        beerRepository.save(beerEntityStout);
-        beerRepository.save(beerEntityPorter);
         var beerList = List.of(BeerData.beerDtoAle(id));
         var beerListString = jacksonObjectMapper.writeValueAsString(beerList);
 
@@ -100,34 +103,14 @@ public class SearchControllerTests {
     void searchInStockTest() throws Exception {
         var beerEntityLager = BeerData.beerEntityLager();
         var beerId = beerRepository.save(beerEntityLager).getId();
-        var storeId1 = storeRepository.save(StoreData.storeEntity1()).getId();
-        var storeId2 = storeRepository.save(StoreData.storeEntity2()).getId();
-        var storeId3 = storeRepository.save(StoreData.storeEntity3()).getId();
-        var storeId4 = storeRepository.save(StoreData.storeEntity4()).getId();
-        var storageEntity1 = StorageEntity.builder()
-                .beer(beerId)
-                .store(storeId1)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity2 = StorageEntity.builder()
-                .beer(beerId)
-                .store(storeId2)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity3 = StorageEntity.builder()
-                .beer(beerId)
-                .store(storeId3)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity4 = StorageEntity.builder()
-                .beer(beerId)
-                .store(storeId4)
-                .count(BigInteger.valueOf(10))
-                .build();
-        storageRepository.save(storageEntity1);
-        storageRepository.save(storageEntity2);
-        storageRepository.save(storageEntity3);
-        storageRepository.save(storageEntity4);
+        var storeId1 = storeRepository.save(StoreData.storeEntityLenigradskoe()).getId();
+        var storeId2 = storeRepository.save(StoreData.storeEntityProstornaya()).getId();
+        var storeId3 = storeRepository.save(StoreData.storeEntityLetnaya()).getId();
+        var storeId4 = storeRepository.save(StoreData.storeEntityDzerzhinskogo()).getId();
+        storageRepository.save(storageEntityBuilder(beerId, storeId1));
+        storageRepository.save(storageEntityBuilder(beerId, storeId2));
+        storageRepository.save(storageEntityBuilder(beerId, storeId3));
+        storageRepository.save(storageEntityBuilder(beerId, storeId4));
         mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/in-stock")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("beerId", beerId)
@@ -149,47 +132,19 @@ public class SearchControllerTests {
         var beerId2 = beerRepository.save(beerEntity2).getId();
         var beerId3 = beerRepository.save(beerEntity3).getId();
         var beerIds = List.of(beerId1, beerId2, beerId3);
-        var storeEntity1 = StoreData.storeEntity1();
-        var storeEntity2 = StoreData.storeEntity2();
-        var storeEntity3 = StoreData.storeEntity3();
+        var storeEntity1 = StoreData.storeEntityLenigradskoe();
+        var storeEntity2 = StoreData.storeEntityProstornaya();
+        var storeEntity3 = StoreData.storeEntityLetnaya();
         String storeId1 = storeRepository.save(storeEntity1).getId();
         String storeId2 = storeRepository.save(storeEntity2).getId();
         String storeId3 = storeRepository.save(storeEntity3).getId();
-        var storageEntity1 = StorageEntity.builder()
-                .beer(beerId1)
-                .store(storeId1)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity2 = StorageEntity.builder()
-                .beer(beerId1)
-                .store(storeId2)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity3 = StorageEntity.builder()
-                .beer(beerId1)
-                .store(storeId3)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity4 = StorageEntity.builder()
-                .beer(beerId2)
-                .store(storeId1)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity5 = StorageEntity.builder()
-                .beer(beerId2)
-                .store(storeId2)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity6 = StorageEntity.builder()
-                .beer(beerId3)
-                .store(storeId2)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity7 = StorageEntity.builder()
-                .beer(beerId3)
-                .store(storeId3)
-                .count(BigInteger.valueOf(10))
-                .build();
+        var storageEntity1 = storageEntityBuilder(beerId1, storeId1);
+        var storageEntity2 = storageEntityBuilder(beerId1, storeId2);
+        var storageEntity3 = storageEntityBuilder(beerId1, storeId3);
+        var storageEntity4 = storageEntityBuilder(beerId2, storeId2);
+        var storageEntity5 = storageEntityBuilder(beerId2, storeId2);
+        var storageEntity6 = storageEntityBuilder(beerId3, storeId2);
+        var storageEntity7 = storageEntityBuilder(beerId3, storeId3);
         storageRepository.save(storageEntity1);
         storageRepository.save(storageEntity2);
         storageRepository.save(storageEntity3);
@@ -215,23 +170,11 @@ public class SearchControllerTests {
         beerRepository.save(beerEntity1);
         beerRepository.save(beerEntity2);
         beerRepository.save(beerEntity3);
-        var storeEntity = StoreData.storeEntity1();
+        var storeEntity = StoreData.storeEntityLenigradskoe();
         String storeId = storeRepository.save(storeEntity).getId();
-        var storageEntity1 = StorageEntity.builder()
-                .beer(beerEntity1.getId())
-                .store(storeId)
-                .count(BigInteger.valueOf(10))
-                .build();
-        var storageEntity2 = StorageEntity.builder()
-                .beer(beerEntity2.getId())
-                .store(storeId)
-                .count(BigInteger.valueOf(100))
-                .build();
-        var storageEntity3 = StorageEntity.builder()
-                .beer(beerEntity3.getId())
-                .store(storeId)
-                .count(BigInteger.valueOf(10))
-                .build();
+        var storageEntity1 = storageEntityBuilder(beerEntity1.getId(), storeId);
+        var storageEntity2 = storageEntityBuilder(beerEntity2.getId(), storeId);
+        var storageEntity3 = storageEntityBuilder(beerEntity3.getId(), storeId);
         storageRepository.save(storageEntity1);
         storageRepository.save(storageEntity2);
         storageRepository.save(storageEntity3);
@@ -241,6 +184,6 @@ public class SearchControllerTests {
                         .param("pageNumber", "1")
                         .param("pageSize", "2"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.content[0].name").value("Напиток пивной Айс Крим Портер Хазелнат"));
+                .andExpect(jsonPath("$.content[0].beer.name").value("Напиток пивной Айс Крим Портер Хазелнат"));
     }
 }
