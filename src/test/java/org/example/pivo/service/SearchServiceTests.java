@@ -7,6 +7,7 @@ import org.example.pivo.constants.StoreIds;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.BeerDto;
+import org.example.pivo.model.dto.BeerInStockDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StorageEntity;
@@ -29,6 +30,7 @@ import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -116,8 +118,9 @@ public class SearchServiceTests {
         var beerEntityList = List.of(BeerData.beerEntityLager(BeerIds.beerId1));
         var type = TypeData.typeEntityLager(BigInteger.TWO);
         var beerDtoList = List.of(BeerData.beerDtoLager(BeerIds.beerId1));
+        var beerEntitiesPage = new PageImpl<>(beerEntityList, PageRequest.of(pageNumber, pageSize), beerEntityList.size());
 
-        Mockito.doReturn(beerEntityList).when(mockBeerRepository).findAll(Mockito.<Specification<BeerEntity>>any());
+        Mockito.doReturn(beerEntitiesPage).when(mockBeerRepository).findAll(Mockito.<Specification<BeerEntity>>any(), Mockito.<Pageable>any());
         Mockito.doReturn(List.of(type)).when(mockTypeRepository).findByIdIn(Set.of(BigInteger.valueOf(2)));
 
         var minPrice = BigDecimal.valueOf(10);
@@ -254,10 +257,10 @@ public class SearchServiceTests {
         var actual = searchService.searchForBeer(StoreIds.storeId1, pageNumber, pageSize);
         Assertions.assertThat(actual.getContent())
                 .isNotNull()
-                .extracting(result -> result.get("beer"))
+                .extracting(BeerInStockDto::getBeerDto)
                 .containsExactlyInAnyOrder(beerDtoLager, beerDtoAle);
         Assertions.assertThat(actual.getContent())
-                .extracting(result -> result.get("quantity"))
+                .extracting(BeerInStockDto::getCount)
                 .containsExactlyInAnyOrder(BigInteger.TEN, BigInteger.valueOf(100));
     }
 

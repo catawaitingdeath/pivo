@@ -12,7 +12,6 @@ public abstract class EmployeeMapper {
     public abstract EmployeeDto toDto(CreateEmployeeDto dto);
 
     public abstract CreateEmployeeDto toCreateDto(EmployeeDto dto);
-
-    @Mapping(target = "employees", source = "dtos")
-    public abstract StoreEmployeeDto toStoreEmployeeDto(String id, List<EmployeeDto> dtos);
+    
+    public abstract StoreEmployeeDto toStoreEmployeeDto(String id, List<EmployeeDto> employees);
 }

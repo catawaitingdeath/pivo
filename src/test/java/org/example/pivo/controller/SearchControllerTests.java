@@ -184,6 +184,6 @@ public class SearchControllerTests {
                         .param("pageNumber", "1")
                         .param("pageSize", "2"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath("$.content[0].beer.name").value("Напиток пивной Айс Крим Портер Хазелнат"));
+                .andExpect(jsonPath("$.content[0].beerDto.name").value("Напиток пивной Айс Крим Портер Хазелнат"));
     }
 }

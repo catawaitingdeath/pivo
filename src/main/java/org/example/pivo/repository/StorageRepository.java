@@ -33,6 +33,4 @@ public interface StorageRepository extends CrudRepository<StorageEntity, String>
     List<String> findStoreIdsWithAllBeers(
             @Param("beerIds")
             List<String> beerIds);
-
-    String Beer(String beer);
 }

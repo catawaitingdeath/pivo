@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.client.CreateEmployeeDto;
 import org.example.pivo.client.EmployeeDto;
-import org.example.pivo.client.EmployeeMapper;
 import org.example.pivo.client.StoreEmployeeDto;
 import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.model.dto.StoreEmployeeInfoDto;
@@ -27,6 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -57,8 +57,8 @@ public class StoreControllerTests {
 
     private CreateEmployeeDto createAlice = FileReaderUtility.readFile("/controllerFiles/employee/createAlice.json", CreateEmployeeDto.class);
     private CreateEmployeeDto createBob = FileReaderUtility.readFile("/controllerFiles/employee/createBob.json", CreateEmployeeDto.class);
-    private String Alice = FileReaderUtility.readFile("/controllerFiles/employee/Alice.json");
-    private String Bob = FileReaderUtility.readFile("/controllerFiles/employee/Bob.json");
+    private String alice = FileReaderUtility.readFile("/controllerFiles/employee/Alice.json");
+    private String bob = FileReaderUtility.readFile("/controllerFiles/employee/Bob.json");
 
     @BeforeEach
     public void setUp() {
@@ -67,7 +67,7 @@ public class StoreControllerTests {
         WireMock.removeAllMappings();
     }
 
-    private void forCreation() throws JsonProcessingException {
+    private List<Consumer<Integer>> forCreation() throws JsonProcessingException {
         WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/employee/store/" + id))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -76,26 +76,44 @@ public class StoreControllerTests {
                                       "id": "%s",
                                       "employees": [%s, %s]
                                     }
-                                """.formatted(id, Alice, Bob))));
+                                """.formatted(id, alice, bob))));
 
         WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/employee"))
                 .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createAlice)))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody("""
-                                    %s
-                                """.formatted(Alice))));
+                        .withBody(alice)));
 
         WireMock.stubFor(WireMock.post(WireMock.urlPathEqualTo("/employee"))
                 .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createBob)))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody("""
-                                    %s
-                                """.formatted(Bob))));
+                        .withBody(bob)));
+
+
+        var consumers = new ArrayList<Consumer<Integer>>();
+        consumers.add(i -> WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id)))));
+        consumers.add(i -> {
+            try {
+                WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
+                        .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createBob))));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        consumers.add(i -> {
+            try {
+                WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
+                        .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createAlice))));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return consumers;
     }
 
-    private void forDeletion() {
+    private Consumer<Integer> forDeletion() {
         WireMock.stubFor(WireMock.delete(WireMock.urlPathEqualTo("/employee/store/" + id))
                 .inScenario("employees")
                 .willSetStateTo("Deleted")
@@ -108,6 +126,8 @@ public class StoreControllerTests {
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"employees\":[]}")));
+        return i -> WireMock.verify(i,
+                WireMock.deleteRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
     }
 
     private Consumer<Integer> getWith2Employees() {
@@ -119,7 +139,7 @@ public class StoreControllerTests {
                                       "id": "%s",
                                       "employees": [%s, %s]
                                     }
-                                """.formatted(id, Alice, Bob))));
+                                """.formatted(id, alice, bob))));
         return i -> WireMock.verify(i,
                 WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
     }
@@ -171,23 +191,15 @@ public class StoreControllerTests {
         forCreation();
         var storeEntity = StoreData.storeEntityLenigradskoe(id);
         storeRepository.save(storeEntity);
-        var employeesString = mockMvc.perform(MockMvcRequestBuilders.get("/store/{id}/employees", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        var employees = objectMapper.readValue(employeesString, StoreEmployeeDto.class);
-        Assertions.assertThat(employees.getEmployees())
-                .hasSize(2);
-        forDeletion();
+        var stub = forDeletion();
         mockMvc.perform(MockMvcRequestBuilders.delete("/store/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         var storesAfter = storeRepository.findAll();
         Assertions.assertThat(storesAfter)
                 .isEmpty();
-        WireMock.verify(2, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
-        WireMock.verify(1,
-                WireMock.deleteRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
+        WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
+        stub.accept(1);
     }
 
     @Test
@@ -244,15 +256,15 @@ public class StoreControllerTests {
 
     @Test
     void registerEmployeesTest() throws Exception {
-        forCreation();
+        var stub = forCreation();
         var storeEntity = StoreData.storeEntityLenigradskoe(id);
         storeRepository.save(storeEntity);
         var content = List.of(createAlice, createBob);
-        var Alice = FileReaderUtility.readFile("/controllerFiles/employee/Alice.json", EmployeeDto.class);
-        var Bob = FileReaderUtility.readFile("/controllerFiles/employee/Bob.json", EmployeeDto.class);
+        var alice = FileReaderUtility.readFile("/controllerFiles/employee/Alice.json", EmployeeDto.class);
+        var bob = FileReaderUtility.readFile("/controllerFiles/employee/Bob.json", EmployeeDto.class);
         var storeEmployeeDto = StoreEmployeeDto.builder()
                 .id(storeEntity.getId())
-                .employees(List.of(Alice, Bob))
+                .employees(List.of(alice, bob))
                 .build();
         String json = objectMapper.writeValueAsString(storeEmployeeDto);
 
@@ -262,8 +274,9 @@ public class StoreControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().json(json));;
 
-        WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id))));
-        WireMock.verify(2, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee")));
+        for(var consumer: stub){
+            consumer.accept(1);
+        }
     }
 
     @Test
