@@ -1,6 +1,7 @@
 package org.example.pivo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.pivo.annotation.Measure;
 import org.example.pivo.mapper.BeerMapper;
 import org.example.pivo.model.dto.BeerDto;
 import org.example.pivo.model.dto.CreateBeerDto;
@@ -27,6 +28,7 @@ public class BeerService {
     private final TypeRepository typeRepository;
     private final BeerMapper beerMapper;
 
+    @Measure
     public BeerDto create(CreateBeerDto beer) {
         BeerEntity beerEntity = beerMapper.toEntity(beer);
         var typeEntity = typeRepository.findByName(beer.getTypeName())

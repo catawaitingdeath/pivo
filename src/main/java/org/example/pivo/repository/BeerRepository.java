@@ -19,8 +19,6 @@ public interface BeerRepository extends JpaRepository<BeerEntity, String>, JpaSp
 
     Page<BeerEntity> findAll(Specification<BeerEntity> spec, Pageable pageable);
 
-    BeerEntity findByName(String name);
-
     List<BeerEntity> findAllByPriceGreaterThanAndAlcoholOrderByPriceDesc(BigDecimal price, BigDecimal alcohol);
 
     Page<BeerEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);

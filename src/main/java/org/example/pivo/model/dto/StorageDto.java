@@ -35,6 +35,6 @@ public class StorageDto {
 
     @Schema(description = "Количество бутылок пива на складе (формат BigInteger)", example = "6")
     @NotNull
-    @Positive(message = "Количество юутылок на складе должно быть положительным")
+    @Positive(message = "Количество бутылок на складе должно быть положительным")
     private BigInteger count;
 }

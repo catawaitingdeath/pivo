@@ -88,7 +88,7 @@ public class SearchService {
         if (type != null) {
             spec = spec.and(beerSpecification.hasType(type));
         }
-        List<BeerEntity> all = beerRepository.findAll(spec);
+        Page<BeerEntity> all = beerRepository.findAll(spec, pageable);
         var typeIds = all.stream()
                 .map(BeerEntity::getType)
                 .collect(Collectors.toSet());
@@ -98,7 +98,7 @@ public class SearchService {
         var result = all.stream()
                 .map(b -> beerMapper.toDto(b, beerTypes.get(b.getType())))
                 .toList();
-        return new PageImpl<>(result, pageable, all.size());
+        return new PageImpl<>(result, pageable, all.getTotalElements());
     }
 
     public Page<StoreDto> searchInStock(String beerId, Integer pageNumber, Integer pageSize) {
@@ -124,7 +124,7 @@ public class SearchService {
         return new PageImpl<>(stores, PageRequest.of(pageNumber, pageSize), storeEntities.getTotalElements());
     }
 
-    public Page<Map<String, Object>> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
+    public Page<BeerInStockDto> searchForBeer(String storeId, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         var beers = storeRepository.findBeersByStoreId(storeId, pageable);
         if (beers == null || beers.isEmpty()) {
@@ -136,13 +136,7 @@ public class SearchService {
             var beerDto = beerMapper.toDto(beerInStock, typeEntity.get());
             var count = storageRepository.findByBeerAndStore(beerDto.getId(), storeId).getCount();
 
-            BeerInStockDto dto = new BeerInStockDto(beerDto, count);
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("beer", dto.getBeerDto());
-            result.put("quantity", dto.getCount());
-
-            return result;
+            return new BeerInStockDto(beerDto, count);
         });
     }
 }

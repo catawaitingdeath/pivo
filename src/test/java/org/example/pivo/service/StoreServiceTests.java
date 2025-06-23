@@ -11,6 +11,7 @@ import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.dto.StoreEmployeeInfoDto;
 import org.example.pivo.model.entity.BeerEntity;
 import org.example.pivo.model.entity.StoreEntity;
+import org.example.pivo.model.exceptions.BadRequestPivoException;
 import org.example.pivo.model.exceptions.InternalErrorPivoException;
 import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.StoreRepository;
@@ -299,7 +300,7 @@ public class StoreServiceTests {
 
         Mockito.doReturn(Optional.of(storeEntity)).when(mockStoreRepository).findById(id1);
 
-        var exception = assertThrows(NotFoundPivoException.class, () -> storeService.registerEmployees(id1, List.of()));
+        var exception = assertThrows(BadRequestPivoException.class, () -> storeService.registerEmployees(id1, List.of()));
         Assertions.assertThat(exception.getMessage())
                 .isEqualTo("Список сотрудников не может быть пустым");
     }

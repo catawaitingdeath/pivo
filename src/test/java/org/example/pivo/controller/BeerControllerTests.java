@@ -47,8 +47,8 @@ public class BeerControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "Жигули Барное светлое фильтрованное",
-                                  "producer": "Московская пивоваренная компания",
+                                  "name": "          Жигули Барное           светлое фильтрованное         ",
+                                  "producer": "московская пивоваренная компания",
                                   "price": 70,
                                   "alcohol": 5,
                                   "typeName": "лагер"

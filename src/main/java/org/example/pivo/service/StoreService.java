@@ -10,6 +10,7 @@ import org.example.pivo.mapper.StoreMapper;
 import org.example.pivo.model.dto.CreateStoreDto;
 import org.example.pivo.model.dto.StoreDto;
 import org.example.pivo.model.dto.StoreEmployeeInfoDto;
+import org.example.pivo.model.exceptions.BadRequestPivoException;
 import org.example.pivo.model.exceptions.InternalErrorPivoException;
 import org.example.pivo.model.exceptions.NotFoundPivoException;
 import org.example.pivo.repository.StoreRepository;
@@ -58,16 +59,12 @@ public class StoreService {
         storeRepository.findById(id)
                 .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
         var employees = employeeClient.getEmployees(id);
-        if (employees != null && !employees.getEmployees().isEmpty()) {
-            employeeClient.deleteEmployees(id);
-        }
         try {
             storeRepository.deleteById(id);
-        } catch (Exception e) {
-            for(EmployeeDto employee : employees.getEmployees()) {
-                var createEmployeeDto = employeeMapper.toCreateDto(employee);
-                employeeClient.createEmployee(createEmployeeDto);
+            if (employees != null && !employees.getEmployees().isEmpty()) {
+                employeeClient.deleteEmployees(id);
             }
+        } catch (Exception e) {
             throw new InternalErrorPivoException("Не удалось удалить магазин");
         }
 
@@ -92,7 +89,7 @@ public class StoreService {
         storeRepository.findById(id)
                 .orElseThrow(()-> new NotFoundPivoException("Предоставлен неверный id"));
         if(employees == null || employees.isEmpty()){
-            throw new NotFoundPivoException("Список сотрудников не может быть пустым");
+            throw new BadRequestPivoException("Список сотрудников не может быть пустым");
         }
         for(CreateEmployeeDto employee : employees) {
             employee.setStore(id);
