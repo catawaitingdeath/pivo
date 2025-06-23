@@ -92,22 +92,16 @@ public class StoreControllerTests {
 
 
         var consumers = new ArrayList<Consumer<Integer>>();
+        String createBobBody = objectMapper.writeValueAsString(createBob);
+        String createAliceBody = objectMapper.writeValueAsString(createAlice);
         consumers.add(i -> WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id)))));
         consumers.add(i -> {
-            try {
                 WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
-                        .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createBob))));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+                        .withRequestBody(WireMock.equalToJson(createBobBody)));
         });
         consumers.add(i -> {
-            try {
                 WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
-                        .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(createAlice))));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+                        .withRequestBody(WireMock.equalToJson(createAliceBody)));
         });
 
         return consumers;

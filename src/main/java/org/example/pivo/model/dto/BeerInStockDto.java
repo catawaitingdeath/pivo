@@ -18,7 +18,7 @@ import java.math.BigInteger;
 public class BeerInStockDto {
 
     @Schema(description = "Объект BeerDto")
-    @NotBlank
+    @NotNull
     private BeerDto beerDto;
 
     @Schema(example = "60", description = "Количество пива в наличии (формат BigInteger)")
