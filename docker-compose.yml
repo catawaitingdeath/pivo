@@ -29,4 +29,8 @@ services:
       POSTGRES_USER: application
       POSTGRES_PASSWORD: password
     volumes:
-      - C:/docker/pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
