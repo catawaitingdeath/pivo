@@ -33,7 +33,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.5")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")
-    testImplementation("org.testcontainers:postgresql:1.21.0")
+    testImplementation("org.testcontainers:postgresql:1.21.3")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -54,8 +54,24 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     testImplementation("org.wiremock.integrations:wiremock-spring-boot:3.6.0")
+
+    // kafka-listener mode
+    implementation("org.springframework.kafka:spring-kafka")
+    // functional-stream mode
+    implementation("org.springframework.cloud:spring-cloud-stream")
+    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+    // integration-flow mode
+    implementation("org.springframework.integration:spring-integration-core")
+    implementation("org.springframework.integration:spring-integration-kafka")
+
+    testImplementation("org.testcontainers:kafka:1.21.3")
+    testImplementation("commons-codec:commons-codec:1.18.0")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.test {
+    // environment("TESTCONTAINERS_REUSE_ENABLE", "true")
 }

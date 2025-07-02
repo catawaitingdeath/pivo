@@ -1,46 +1,21 @@
 package org.example.pivo.controller;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.client.CreateEmployeeDto;
-import org.example.pivo.config.PostgresInitializer;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.wiremock.spring.ConfigureWireMock;
-import org.wiremock.spring.EnableWireMock;
 
 import java.math.BigInteger;
 
-@EnableWireMock(
-        {
-                @ConfigureWireMock(
-                        name = "wm-server",
-                        port = 10102
-                )
-        }
-)
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles(profiles = "tests")
-@ContextConfiguration(initializers = {PostgresInitializer.class})
-public class PlaygroundControllerTests {
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
+
+public class PlaygroundControllerTests extends BasicControllerTests {
 
     @Test
     public void feignTest() throws Exception {
-        var storeId = "S7TKIwtHDfoLOESVj16e_v3ie";
+        var storeId = "W_cPwW5eqk9kxe2OxgivJzVgu";
         var create1 = CreateEmployeeDto.builder()
                 .name("Alice")
                 .surname("Johnson")
@@ -114,7 +89,7 @@ public class PlaygroundControllerTests {
                                           "email": "alice.johnson@example.com",
                                           "position": "Cashier",
                                           "salary": 30000,
-                                          "store": "store_123"
+                                          "store": "%s"
                                         },
                                         {
                                           "id": "id_2",
@@ -124,11 +99,11 @@ public class PlaygroundControllerTests {
                                           "email": "bob.smith@example.com",
                                           "position": "Manager",
                                           "salary": 50000,
-                                          "store": "store_123"
+                                          "store": "%s"
                                         }
                                       ]
                                     }
-                                """))
+                                """.formatted(storeId, storeId)))
                 .willSetStateTo("DELETED"));
 
         // --- DELETE ---

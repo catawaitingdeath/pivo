@@ -1,23 +1,11 @@
 package org.example.pivo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
-import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.model.entity.StorageEntity;
-import org.example.pivo.repository.BeerRepository;
-import org.example.pivo.repository.StorageRepository;
-import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.BeerData;
 import org.example.pivo.utils.data.StoreData;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -26,38 +14,17 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles(profiles = "tests")
-@ContextConfiguration(initializers = {PostgresInitializer.class})
-public class SearchControllerTests {
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private BeerRepository beerRepository;
-    @Autowired
-    private ObjectMapper jacksonObjectMapper;
-    @Autowired
-    private StoreRepository storeRepository;
-    @Autowired
-    private StorageRepository storageRepository;
 
-    @BeforeEach
-    public void setUp() {
-        storageRepository.deleteAll();
-        storeRepository.deleteAll();
-        beerRepository.deleteAll();
+public class SearchControllerTests extends BasicControllerTests {
 
-    }
-
-    public void saveBeerEntities(){
+    public void saveBeerEntities() {
         beerRepository.save(BeerData.beerEntityLager());
         beerRepository.save(BeerData.beerEntityAle());
         beerRepository.save(BeerData.beerEntityPorter());
         beerRepository.save(BeerData.beerEntityStout());
     }
 
-    public StorageEntity storageEntityBuilder(String beer, String store){
+    public StorageEntity storageEntityBuilder(String beer, String store) {
         return StorageEntity.builder()
                 .beer(beer)
                 .store(store)
@@ -83,7 +50,7 @@ public class SearchControllerTests {
         var beerEntityAle = BeerData.beerEntityAle();
         var id = beerRepository.save(beerEntityAle).getId();
         var beerList = List.of(BeerData.beerDtoAle(id));
-        var beerListString = jacksonObjectMapper.writeValueAsString(beerList);
+        var beerListString = objectMapper.writeValueAsString(beerList);
 
         var result = mockMvc.perform(MockMvcRequestBuilders.get("/beer/search/by-criteria")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,25 +1,14 @@
 package org.example.pivo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
-import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.model.dto.BeerShipmentDto;
-import org.example.pivo.repository.BeerRepository;
-import org.example.pivo.repository.StorageRepository;
-import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.data.BeerData;
 import org.example.pivo.utils.data.StorageData;
 import org.example.pivo.utils.data.StoreData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -30,22 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles(profiles = "tests")
-@ContextConfiguration(initializers = {PostgresInitializer.class})
-public class StorageControllerTests {
+public class StorageControllerTests extends BasicControllerTests {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private StorageRepository storageRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private StoreRepository storeRepository;
-    @Autowired
-    private BeerRepository beerRepository;
     private String beerId1 = "2IVPACIrIT-Tr2Gw-JoApXZKT";
     private String beerId2 = "Ota-_XO_6Dc2nCKEU7LEmsi1K";
     private String storeId1 = "S7TKIwtHDfoLOESVj16e_v3ie";
@@ -54,9 +29,6 @@ public class StorageControllerTests {
 
     @BeforeEach
     public void setUp() {
-        storageRepository.deleteAll();
-        storeRepository.deleteAll();
-        beerRepository.deleteAll();
         beerRepository.save(BeerData.beerEntityAle(beerId1));
         beerRepository.save(BeerData.beerEntityLager(beerId2));
         storeRepository.save(StoreData.storeEntityLenigradskoe(storeId1));

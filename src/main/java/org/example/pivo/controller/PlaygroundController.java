@@ -55,16 +55,16 @@ public class PlaygroundController {
 
         log.info("JDK: отправляем POST #2");
         var postBody2 = """
-            {
-              "name": "Bob",
-              "surname": "Smith",
-              "phone": "79684551888",
-              "email": "bob.smith@example.com",
-              "position": "Manager",
-              "salary": 50000,
-              "store": "%s"
-            }
-        """.formatted(storeId);
+                    {
+                      "name": "Bob",
+                      "surname": "Smith",
+                      "phone": "79684551888",
+                      "email": "bob.smith@example.com",
+                      "position": "Manager",
+                      "salary": 50000,
+                      "store": "%s"
+                    }
+                """.formatted(storeId);
         var post2 = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8081/employee"))
                 .header("Content-Type", "application/json")
@@ -101,16 +101,16 @@ public class PlaygroundController {
         var okHttpClient = new OkHttpClient();
         log.info("OkHttp: отправляем POST #1");
         var body1 = """
-            {
-              "name": "Alice",
-              "surname": "Johnson",
-              "phone": "79684551122",
-              "email": "alice.johnson@example.com",
-              "position": "Cashier",
-              "salary": 30000,
-              "store": "%s"
-            }
-        """.formatted(storeId);
+                    {
+                      "name": "Alice",
+                      "surname": "Johnson",
+                      "phone": "79684551122",
+                      "email": "alice.johnson@example.com",
+                      "position": "Cashier",
+                      "salary": 30000,
+                      "store": "%s"
+                    }
+                """.formatted(storeId);
         var mediaType = MediaType.get("application/json; charset=utf-8");
         var postReq1 = new Request.Builder()
                 .url("http://localhost:8081/employee")
@@ -121,16 +121,16 @@ public class PlaygroundController {
         }
         log.info("OkHttp: отправляем POST #2");
         var body2 = """
-            {
-              "name": "Bob",
-              "surname": "Smith",
-              "phone": "79684551888",
-              "email": "bob.smith@example.com",
-              "position": "Manager",
-              "salary": 50000,
-              "store": "%s"
-            }
-        """.formatted(storeId);
+                    {
+                      "name": "Bob",
+                      "surname": "Smith",
+                      "phone": "79684551888",
+                      "email": "bob.smith@example.com",
+                      "position": "Manager",
+                      "salary": 50000,
+                      "store": "%s"
+                    }
+                """.formatted(storeId);
         var postReq2 = new Request.Builder()
                 .url("http://localhost:8081/employee")
                 .post(RequestBody.create(body2, mediaType))
@@ -194,13 +194,13 @@ public class PlaygroundController {
         StoreEmployeeDto storeBefore = employeeClient.getEmployees(storeId);
         log.info("Feign: ответ GET до удаления: {}", storeBefore);
 
-//        log.info("Feign: отправляем DELETE");
-//        employeeClient.deleteEmployees(storeId);
-//        log.info("Feign: DELETE завершён");
-//
-//        log.info("Feign: отправляем GET после удаления");
-//        StoreEmployeeDto storeAfter = employeeClient.getEmployees(storeId);
-//        log.info("Feign: ответ GET после удаления: {}", storeAfter);
+        log.info("Feign: отправляем DELETE");
+        employeeClient.deleteEmployees(storeId);
+        log.info("Feign: DELETE завершён");
+
+        log.info("Feign: отправляем GET после удаления");
+        StoreEmployeeDto storeAfter = employeeClient.getEmployees(storeId);
+        log.info("Feign: ответ GET после удаления: {}", storeAfter);
 
     }
 }

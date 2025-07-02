@@ -1,20 +1,11 @@
 package org.example.pivo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Assertions;
-import org.example.pivo.config.PostgresInitializer;
-import org.example.pivo.repository.BeerRepository;
 import org.example.pivo.utils.data.BeerData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -22,18 +13,7 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles(profiles = "tests")
-@ContextConfiguration(initializers = {PostgresInitializer.class})
-public class BeerControllerTests {
-
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private BeerRepository beerRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
+public class BeerControllerTests extends BasicControllerTests {
     private String idLager = "W_cPwW5eqk9kxe2OxgivJzVgu";
 
     @BeforeEach

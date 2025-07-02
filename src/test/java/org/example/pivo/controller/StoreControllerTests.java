@@ -1,30 +1,18 @@
 package org.example.pivo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
 import org.example.pivo.client.CreateEmployeeDto;
 import org.example.pivo.client.EmployeeDto;
 import org.example.pivo.client.StoreEmployeeDto;
-import org.example.pivo.config.PostgresInitializer;
 import org.example.pivo.model.dto.StoreEmployeeInfoDto;
-import org.example.pivo.repository.StoreRepository;
 import org.example.pivo.utils.FileReaderUtility;
 import org.example.pivo.utils.data.StoreData;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.wiremock.spring.ConfigureWireMock;
-import org.wiremock.spring.EnableWireMock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,39 +21,15 @@ import java.util.function.Consumer;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@EnableWireMock(
-        {
-                @ConfigureWireMock(
-                        name = "wm-server",
-                        port = 10102
-                )
-        }
-)
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles(profiles = "tests")
-@ContextConfiguration(initializers = {PostgresInitializer.class})
-public class StoreControllerTests {
-
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private StoreRepository storeRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
+public class StoreControllerTests extends BasicControllerTests {
     private String id = "W_cPwW5eqk9kxe2OxgivJzVgu";
 
-    private CreateEmployeeDto createAlice = FileReaderUtility.readFile("/controllerFiles/employee/createAlice.json", CreateEmployeeDto.class);
-    private CreateEmployeeDto createBob = FileReaderUtility.readFile("/controllerFiles/employee/createBob.json", CreateEmployeeDto.class);
+    private CreateEmployeeDto createAlice = FileReaderUtility.readFile("/controllerFiles/employee/createAlice.json",
+            CreateEmployeeDto.class);
+    private CreateEmployeeDto createBob = FileReaderUtility.readFile("/controllerFiles/employee/createBob.json",
+            CreateEmployeeDto.class);
     private String alice = FileReaderUtility.readFile("/controllerFiles/employee/Alice.json");
     private String bob = FileReaderUtility.readFile("/controllerFiles/employee/Bob.json");
-
-    @BeforeEach
-    public void setUp() {
-        storeRepository.deleteAll();
-        WireMock.reset();
-        WireMock.removeAllMappings();
-    }
 
     private List<Consumer<Integer>> forCreation() throws JsonProcessingException {
         WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/employee/store/" + id))
@@ -94,14 +58,15 @@ public class StoreControllerTests {
         var consumers = new ArrayList<Consumer<Integer>>();
         String createBobBody = objectMapper.writeValueAsString(createBob);
         String createAliceBody = objectMapper.writeValueAsString(createAlice);
-        consumers.add(i -> WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id)))));
+        consumers.add(i -> WireMock.verify(1,
+                WireMock.getRequestedFor(WireMock.urlPathEqualTo("/employee/store/%s".formatted(id)))));
         consumers.add(i -> {
-                WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
-                        .withRequestBody(WireMock.equalToJson(createBobBody)));
+            WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
+                    .withRequestBody(WireMock.equalToJson(createBobBody)));
         });
         consumers.add(i -> {
-                WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
-                        .withRequestBody(WireMock.equalToJson(createAliceBody)));
+            WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlPathEqualTo("/employee"))
+                    .withRequestBody(WireMock.equalToJson(createAliceBody)));
         });
 
         return consumers;
@@ -266,9 +231,10 @@ public class StoreControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(content)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(content().json(json));;
+                .andExpect(content().json(json));
+        ;
 
-        for(var consumer: stub){
+        for (var consumer : stub) {
             consumer.accept(1);
         }
     }

@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: kafka-listener #kafka-listener #functional-stream #integration-flow
   liquibase:
     enabled: true
     change-log: classpath:changelog/changelog.yml
@@ -14,18 +16,68 @@ spring:
       hibernate:
         format_sql: true     # Форматирует SQL
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: ${beer-application.kafka.group-id}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.json.trusted.packages: org.example.pivo.*
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.value.default.type: com.fasterxml.jackson.databind.JsonNode
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
+springdoc:
+  swagger-ui:
+    path: "/swagger"
+    url: "/v3/api-docs"
+    configUrl: "/v3/api-docs/swagger-config"
+
 beer-application:
   nanoid:
     size: 25
     alphabet: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-"
   urls:
     employee: "http://localhost:8081"
-springdoc:
-  swagger-ui:
-    path: "/swagger"
-    url: "/v3/api-docs"
-    configUrl: "/v3/api-docs/swagger-config"
+  kafka:
+    group-id: beer-app
+    flows:
+      store-creation:
+        topic: storeCreation
+        source: X
+      employee-creation:
+        topic: employeeCreation
+        source: ${spring.application.name}
+
+--- # Настойки из этого блока применятся только при активированном профиле kafka-listener
+spring:
+  config:
+    activate:
+      on-profile: kafka-listener
+
+
+--- # Настойки из этого блока применятся только при активированном профиле functional-stream
+spring:
+  config:
+    activate:
+      on-profile: functional-stream
+  cloud:
+    stream:
+      function:
+        definition: storeCreationHandler
+      bindings:
+        storeCreationHandler-in-0:
+          destination: ${beer-application.kafka.flows.store-creation.topic}
+          group: ${beer-application.kafka.group-id}
+
+--- # Настойки из этого блока применятся только при активированном профиле integration-flow
+spring:
+  config:
+    activate:
+      on-profile: integration-flow
