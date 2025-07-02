@@ -1,5 +1,6 @@
 package org.example.pivo.kafka;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.Message;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
@@ -27,7 +26,7 @@ public class StoreFunctionalStreamHandler {
     private final KafkaProperties kafkaProperties;
 
     @Bean
-    public Consumer<Message<String>> storeCreationHandler() {
+    public Consumer<Message<JsonNode>> storeCreationHandler() {
         return msg -> {
             var source = resolveHeader(msg, "source");
             var expected = kafkaProperties.getFlows().getStoreCreation().getSource();
@@ -40,12 +39,8 @@ public class StoreFunctionalStreamHandler {
                 return;
             }
 
-            try {
-                var dto = objectMapper.readValue(payload, CreateStoreWithEmployeeDto.class);
-                service.create(dto);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            var dto = objectMapper.convertValue(payload, CreateStoreWithEmployeeDto.class);
+            service.create(dto);
         };
     }
 
